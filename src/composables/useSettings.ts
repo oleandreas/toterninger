@@ -1,7 +1,10 @@
 import { reactive, watch } from 'vue'
 
+export type AnimationSpeed = 'fast' | 'medium' | 'slow'
+
 export interface Settings {
   animation: boolean
+  animationSpeed: AnimationSpeed
   sound: boolean
   catanMode: boolean
   shakeToRoll: boolean
@@ -18,7 +21,7 @@ function loadSettings(): Settings {
 }
 
 function defaultSettings(): Settings {
-  return { animation: true, sound: true, catanMode: true, shakeToRoll: false }
+  return { animation: true, animationSpeed: 'medium' as AnimationSpeed, sound: true, catanMode: true, shakeToRoll: false }
 }
 
 const settings = reactive<Settings>(loadSettings())

@@ -2,6 +2,7 @@
 import { ref, computed } from 'vue'
 import DiceFace from './DiceFace.vue'
 import { useSettings } from '../composables/useSettings'
+import type { AnimationSpeed } from '../composables/useSettings'
 import { useStatistics } from '../composables/useStatistics'
 import { useShake } from '../composables/useShake'
 import { playDiceSound } from '../composables/useSound'
@@ -17,6 +18,17 @@ const showResult = ref(false)
 const sum = computed(() => die1.value + die2.value)
 const comment = computed(() => hasRolled.value && showResult.value ? getLastRollComment() : null)
 
+const speedConfig: Record<AnimationSpeed, { frames: number; interval: number }> = {
+  fast:   { frames: 8,  interval: 60 },
+  medium: { frames: 16, interval: 90 },
+  slow:   { frames: 24, interval: 125 },
+}
+
+const shakeDuration = computed(() => {
+  const cfg = speedConfig[settings.animationSpeed]
+  return `${(cfg.frames * cfg.interval) / 1000}s`
+})
+
 function randomDie(): number {
   return Math.floor(Math.random() * 6) + 1
 }
@@ -31,8 +43,7 @@ async function roll() {
   }
 
   if (settings.animation) {
-    const frames = 18
-    const interval = 90
+    const { frames, interval } = speedConfig[settings.animationSpeed]
     for (let i = 0; i < frames; i++) {
       die1.value = randomDie()
       die2.value = randomDie()
@@ -143,7 +154,7 @@ useShake(roll)
 }
 
 .dice-container.rolling {
-  animation: shake 1.6s ease-in-out;
+  animation: shake v-bind(shakeDuration) ease-in-out;
 }
 
 @keyframes shake {

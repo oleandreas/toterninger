@@ -31,6 +31,15 @@ async function toggleShake() {
       <input type="checkbox" v-model="settings.animation" />
     </label>
 
+    <div v-if="settings.animation" class="setting-row">
+      <span>Animasjonshastighet</span>
+      <div class="speed-buttons">
+        <button :class="{ active: settings.animationSpeed === 'fast' }" @click="settings.animationSpeed = 'fast'">Rask</button>
+        <button :class="{ active: settings.animationSpeed === 'medium' }" @click="settings.animationSpeed = 'medium'">Middels</button>
+        <button :class="{ active: settings.animationSpeed === 'slow' }" @click="settings.animationSpeed = 'slow'">Langsom</button>
+      </div>
+    </div>
+
     <label class="setting-row">
       <span>Lydeffekt</span>
       <input type="checkbox" v-model="settings.sound" />
@@ -90,6 +99,28 @@ async function toggleShake() {
   cursor: pointer;
   accent-color: #3b82f6;
   pointer-events: none;
+}
+
+.speed-buttons {
+  display: flex;
+  gap: 4px;
+}
+
+.speed-buttons button {
+  padding: 5px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  background: #f5f5f5;
+  font-size: 13px;
+  cursor: pointer;
+  color: #666;
+  transition: all 0.2s;
+}
+
+.speed-buttons button.active {
+  background: #3b82f6;
+  color: white;
+  border-color: #3b82f6;
 }
 
 .setting-hint {
