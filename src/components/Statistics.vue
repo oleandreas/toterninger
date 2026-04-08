@@ -1,8 +1,13 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { useStatistics } from '../composables/useStatistics'
+import { computed, inject } from 'vue'
+import { useStatistics, statisticsKey } from '../composables/useStatistics'
 
-const { stats, totalRolls, sumCounts, expectedProbabilities, reset, getCommentForSum } = useStatistics()
+const props = withDefaults(defineProps<{
+  canReset?: boolean
+}>(), { canReset: true })
+
+const statsApi = inject(statisticsKey, undefined) ?? useStatistics()
+const { stats, totalRolls, sumCounts, expectedProbabilities, reset, getCommentForSum } = statsApi
 
 const maxCount = computed(() => Math.max(...Object.values(sumCounts.value), 1))
 
@@ -66,11 +71,12 @@ function handleReset() {
           <span class="history-num">#{{ roll.rollNumber }}</span>
           <span class="history-dice">{{ roll.die1 }} + {{ roll.die2 }}</span>
           <span class="history-sum" :class="{ seven: roll.sum === 7 }">= {{ roll.sum }}</span>
+          <span v-if="roll.playerName" class="history-player">{{ roll.playerName }}</span>
         </div>
       </div>
     </div>
 
-    <button v-if="totalRolls > 0" class="reset-btn" @click="handleReset">
+    <button v-if="totalRolls > 0 && canReset" class="reset-btn" @click="handleReset">
       Nullstill statistikk
     </button>
   </div>
@@ -216,6 +222,12 @@ function handleReset() {
 
 .history-sum.seven {
   color: #dc2626;
+}
+
+.history-player {
+  color: #999;
+  font-size: 12px;
+  margin-left: auto;
 }
 
 .reset-btn {

@@ -1,14 +1,19 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, inject } from 'vue'
 import DiceFace from './DiceFace.vue'
 import { useSettings } from '../composables/useSettings'
 import type { AnimationSpeed } from '../composables/useSettings'
-import { useStatistics } from '../composables/useStatistics'
+import { useStatistics, statisticsKey } from '../composables/useStatistics'
 import { useShake } from '../composables/useShake'
 import { playDiceSound } from '../composables/useSound'
 
+const props = withDefaults(defineProps<{
+  disabled?: boolean
+}>(), { disabled: false })
+
 const { settings } = useSettings()
-const { addRoll, getLastRollComment } = useStatistics()
+const stats = inject(statisticsKey, undefined) ?? useStatistics()
+const { addRoll, getLastRollComment } = stats
 
 const die1 = ref(1)
 const die2 = ref(1)
@@ -34,7 +39,7 @@ function randomDie(): number {
 }
 
 async function roll() {
-  if (rolling.value) return
+  if (rolling.value || props.disabled) return
   rolling.value = true
   showResult.value = false
 
@@ -51,10 +56,9 @@ async function roll() {
     }
   }
 
-  // Final values
   die1.value = randomDie()
   die2.value = randomDie()
-  addRoll(die1.value, die2.value)
+  await addRoll(die1.value, die2.value)
   hasRolled.value = true
   rolling.value = false
   showResult.value = true
@@ -64,7 +68,7 @@ useShake(roll)
 </script>
 
 <template>
-  <div class="dice-roller" @click="roll">
+  <div class="dice-roller" :class="{ disabled }" @click="roll">
     <div
       class="sum-display"
       :class="{
@@ -84,7 +88,9 @@ useShake(roll)
     </div>
 
     <div class="roll-hint" :class="{ faded: hasRolled }">
-      {{ hasRolled ? 'Trykk for å kaste igjen' : 'Trykk for å kaste' }}
+      <template v-if="disabled">Venter på tur...</template>
+      <template v-else-if="hasRolled">Trykk for å kaste igjen</template>
+      <template v-else>Trykk for å kaste</template>
     </div>
 
     <div v-if="comment" class="comment">{{ comment }}</div>
@@ -102,6 +108,11 @@ useShake(roll)
   -webkit-user-select: none;
   padding: 20px;
   min-height: 320px;
+}
+
+.dice-roller.disabled {
+  cursor: default;
+  opacity: 0.6;
 }
 
 .sum-display {

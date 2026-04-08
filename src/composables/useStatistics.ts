@@ -1,4 +1,4 @@
-import { reactive, computed, watch } from 'vue'
+import { reactive, computed, watch, type ComputedRef, type InjectionKey } from 'vue'
 
 export interface RollRecord {
   die1: number
@@ -6,7 +6,22 @@ export interface RollRecord {
   sum: number
   timestamp: number
   rollNumber: number
+  playerId?: string
+  playerName?: string
 }
+
+export interface StatisticsAPI {
+  stats: { rolls: RollRecord[] }
+  addRoll: (die1: number, die2: number) => void | Promise<void>
+  reset: () => void | Promise<void>
+  totalRolls: ComputedRef<number>
+  sumCounts: ComputedRef<Record<number, number>>
+  expectedProbabilities: Record<number, number>
+  getCommentForSum: (sum: number) => string | null
+  getLastRollComment: () => string | null
+}
+
+export const statisticsKey: InjectionKey<StatisticsAPI> = Symbol('statistics')
 
 export interface Statistics {
   rolls: RollRecord[]
