@@ -4,6 +4,7 @@ export interface Settings {
   animation: boolean
   sound: boolean
   catanMode: boolean
+  shakeToRoll: boolean
 }
 
 const STORAGE_KEY = 'toterninger-settings'
@@ -17,7 +18,7 @@ function loadSettings(): Settings {
 }
 
 function defaultSettings(): Settings {
-  return { animation: true, sound: true, catanMode: true }
+  return { animation: true, sound: true, catanMode: true, shakeToRoll: false }
 }
 
 const settings = reactive<Settings>(loadSettings())

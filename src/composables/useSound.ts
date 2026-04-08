@@ -9,37 +9,38 @@ function getAudioContext(): AudioContext {
 
 export function playDiceSound() {
   const ctx = getAudioContext()
-  const duration = 0.4
   const now = ctx.currentTime
 
-  // Create a burst of noise that sounds like dice rattling
-  for (let i = 0; i < 6; i++) {
-    const offset = i * 0.06
+  // Soft marimba-like "tock tock" — gentle wooden taps
+  const notes = [520, 620, 490, 580]
+  for (let i = 0; i < notes.length; i++) {
+    const offset = i * 0.09
     const osc = ctx.createOscillator()
     const gain = ctx.createGain()
 
-    osc.type = 'square'
-    osc.frequency.setValueAtTime(200 + Math.random() * 400, now + offset)
-    osc.frequency.exponentialRampToValueAtTime(80 + Math.random() * 100, now + offset + 0.05)
+    osc.type = 'sine'
+    osc.frequency.setValueAtTime(notes[i], now + offset)
+    osc.frequency.exponentialRampToValueAtTime(notes[i] * 0.8, now + offset + 0.12)
 
-    gain.gain.setValueAtTime(0.08, now + offset)
-    gain.gain.exponentialRampToValueAtTime(0.001, now + offset + 0.06)
+    gain.gain.setValueAtTime(0.06, now + offset)
+    gain.gain.exponentialRampToValueAtTime(0.001, now + offset + 0.15)
 
     osc.connect(gain)
     gain.connect(ctx.destination)
     osc.start(now + offset)
-    osc.stop(now + offset + 0.07)
+    osc.stop(now + offset + 0.16)
   }
 
-  // Final impact sound
-  const noise = ctx.createOscillator()
-  const noiseGain = ctx.createGain()
-  noise.type = 'triangle'
-  noise.frequency.setValueAtTime(150, now + duration - 0.08)
-  noiseGain.gain.setValueAtTime(0.12, now + duration - 0.08)
-  noiseGain.gain.exponentialRampToValueAtTime(0.001, now + duration)
-  noise.connect(noiseGain)
-  noiseGain.connect(ctx.destination)
-  noise.start(now + duration - 0.08)
-  noise.stop(now + duration + 0.05)
+  // Soft chime at the end
+  const chime = ctx.createOscillator()
+  const chimeGain = ctx.createGain()
+  chime.type = 'sine'
+  chime.frequency.setValueAtTime(880, now + 0.4)
+  chime.frequency.exponentialRampToValueAtTime(660, now + 0.7)
+  chimeGain.gain.setValueAtTime(0.04, now + 0.4)
+  chimeGain.gain.exponentialRampToValueAtTime(0.001, now + 0.75)
+  chime.connect(chimeGain)
+  chimeGain.connect(ctx.destination)
+  chime.start(now + 0.4)
+  chime.stop(now + 0.8)
 }

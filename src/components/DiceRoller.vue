@@ -13,8 +13,9 @@ const die1 = ref(1)
 const die2 = ref(1)
 const rolling = ref(false)
 const hasRolled = ref(false)
+const showResult = ref(false)
 const sum = computed(() => die1.value + die2.value)
-const comment = computed(() => hasRolled.value ? getLastRollComment() : null)
+const comment = computed(() => hasRolled.value && showResult.value ? getLastRollComment() : null)
 
 function randomDie(): number {
   return Math.floor(Math.random() * 6) + 1
@@ -23,15 +24,15 @@ function randomDie(): number {
 async function roll() {
   if (rolling.value) return
   rolling.value = true
+  showResult.value = false
 
   if (settings.sound) {
     playDiceSound()
   }
 
   if (settings.animation) {
-    // Animate through random values
-    const frames = 12
-    const interval = 50
+    const frames = 18
+    const interval = 90
     for (let i = 0; i < frames; i++) {
       die1.value = randomDie()
       die2.value = randomDie()
@@ -45,6 +46,7 @@ async function roll() {
   addRoll(die1.value, die2.value)
   hasRolled.value = true
   rolling.value = false
+  showResult.value = true
 }
 
 useShake(roll)
@@ -55,12 +57,12 @@ useShake(roll)
     <div
       class="sum-display"
       :class="{
-        'robber': settings.catanMode && hasRolled && sum === 7,
-        'visible': hasRolled,
+        'robber': settings.catanMode && showResult && sum === 7,
+        'visible': hasRolled && showResult,
       }"
     >
-      <div class="sum-number">{{ hasRolled ? sum : '?' }}</div>
-      <div v-if="settings.catanMode && hasRolled && sum === 7" class="robber-text">
+      <div class="sum-number">{{ hasRolled && showResult ? sum : '?' }}</div>
+      <div v-if="settings.catanMode && showResult && sum === 7" class="robber-text">
         Flytt røveren!
       </div>
     </div>
@@ -141,16 +143,20 @@ useShake(roll)
 }
 
 .dice-container.rolling {
-  animation: shake 0.5s ease-in-out;
+  animation: shake 1.6s ease-in-out;
 }
 
 @keyframes shake {
   0%, 100% { transform: rotate(0deg); }
-  15% { transform: rotate(-8deg) translateX(-4px); }
-  30% { transform: rotate(6deg) translateX(4px); }
-  45% { transform: rotate(-6deg) translateX(-2px); }
-  60% { transform: rotate(4deg) translateX(2px); }
-  75% { transform: rotate(-2deg); }
+  10% { transform: rotate(-8deg) translateX(-4px); }
+  20% { transform: rotate(6deg) translateX(4px); }
+  30% { transform: rotate(-6deg) translateX(-2px); }
+  40% { transform: rotate(4deg) translateX(2px); }
+  50% { transform: rotate(-4deg) translateX(-2px); }
+  60% { transform: rotate(3deg) translateX(1px); }
+  70% { transform: rotate(-2deg); }
+  80% { transform: rotate(1deg); }
+  90% { transform: rotate(-0.5deg); }
 }
 
 .roll-hint {

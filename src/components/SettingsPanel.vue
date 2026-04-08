@@ -19,6 +19,15 @@ const { settings } = useSettings()
     </label>
 
     <label class="setting-row">
+      <span>Rist for å kaste</span>
+      <input type="checkbox" v-model="settings.shakeToRoll" />
+    </label>
+
+    <p class="setting-hint" v-if="settings.shakeToRoll">
+      Rist telefonen for å kaste terningene. Nettleseren kan be om tilgang til bevegelsessensor.
+    </p>
+
+    <label class="setting-row">
       <span>Settlers of Catan-modus</span>
       <input type="checkbox" v-model="settings.catanMode" />
     </label>

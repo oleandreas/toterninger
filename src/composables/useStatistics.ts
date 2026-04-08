@@ -76,40 +76,27 @@ export function useStatistics() {
     if (stats.rolls.length === 0) return null
     const last = stats.rolls[stats.rolls.length - 1]
     const sum = last.sum
+    const total = stats.rolls.length
 
-    // Check early game patterns
-    if (stats.rolls.length <= 10 && stats.rolls.length >= 3) {
-      const recentSums = stats.rolls.slice(-3).map(r => r.sum)
-      if (recentSums.every(s => s === sum)) {
-        return `${sum} tre ganger på rad!`
-      }
-    }
-
-    // Check streaks
+    // Check streak (X ganger på rad)
     let streak = 0
-    for (let i = stats.rolls.length - 1; i >= 0; i--) {
+    for (let i = total - 1; i >= 0; i--) {
       if (stats.rolls[i].sum === sum) streak++
       else break
     }
     if (streak >= 3) return `${sum} har kommet ${streak} ganger på rad!`
 
-    // Check frequency context
-    if (stats.rolls.length >= 5) {
-      const firstHalfLen = Math.floor(stats.rolls.length / 2)
-      const firstHalfCount = stats.rolls.slice(0, firstHalfLen).filter(r => r.sum === sum).length
-      const secondHalfCount = stats.rolls.slice(firstHalfLen).filter(r => r.sum === sum).length
-      const firstRate = firstHalfCount / firstHalfLen
-      const secondRate = secondHalfCount / (stats.rolls.length - firstHalfLen)
-
-      if (firstRate > secondRate * 2 && firstHalfCount >= 2) {
-        return `${sum} var mye vanligere i starten av spillet`
-      }
-      if (secondRate > firstRate * 2 && secondHalfCount >= 2) {
-        return `${sum} har blitt vanligere utover i spillet`
+    // Check if sum exceeds 50% of recent rolls
+    if (total >= 4) {
+      const recentCount = Math.min(total, 10)
+      const recent = stats.rolls.slice(-recentCount)
+      const count = recent.filter(r => r.sum === sum).length
+      if (count > recentCount / 2) {
+        return `${sum} er kastet ${count} av ${recentCount} siste kast`
       }
     }
 
-    return getCommentForSum(sum)
+    return null
   }
 
   return {
