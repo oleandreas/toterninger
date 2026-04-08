@@ -1,7 +1,25 @@
 <script setup lang="ts">
+import { ref } from 'vue'
 import { useSettings } from '../composables/useSettings'
+import { requestShakePermission } from '../composables/useShake'
 
 const { settings } = useSettings()
+const shakePermissionDenied = ref(false)
+
+async function toggleShake() {
+  if (!settings.shakeToRoll) {
+    // Turning ON — request permission now (this is inside a click handler = user gesture)
+    const granted = await requestShakePermission()
+    if (granted) {
+      settings.shakeToRoll = true
+      shakePermissionDenied.value = false
+    } else {
+      shakePermissionDenied.value = true
+    }
+  } else {
+    settings.shakeToRoll = false
+  }
+}
 </script>
 
 <template>
@@ -18,13 +36,16 @@ const { settings } = useSettings()
       <input type="checkbox" v-model="settings.sound" />
     </label>
 
-    <label class="setting-row">
+    <label class="setting-row" @click.prevent="toggleShake">
       <span>Rist for å kaste</span>
-      <input type="checkbox" v-model="settings.shakeToRoll" />
+      <input type="checkbox" :checked="settings.shakeToRoll" />
     </label>
 
-    <p class="setting-hint" v-if="settings.shakeToRoll">
-      Rist telefonen for å kaste terningene. Nettleseren kan be om tilgang til bevegelsessensor.
+    <p class="setting-hint" v-if="shakePermissionDenied">
+      Tilgang til bevegelsessensor ble avslått. Sjekk nettleserinnstillingene.
+    </p>
+    <p class="setting-hint" v-else-if="settings.shakeToRoll">
+      Rist telefonen for å kaste terningene.
     </p>
 
     <label class="setting-row">
@@ -68,6 +89,7 @@ const { settings } = useSettings()
   height: 20px;
   cursor: pointer;
   accent-color: #3b82f6;
+  pointer-events: none;
 }
 
 .setting-hint {

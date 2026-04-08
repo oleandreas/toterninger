@@ -1,8 +1,38 @@
-import { onMounted, onUnmounted, watch } from 'vue'
+import { ref, onUnmounted, watch } from 'vue'
 import { useSettings } from './useSettings'
 
 const SHAKE_THRESHOLD = 15
 const SHAKE_TIMEOUT = 1000
+
+// Shared permission state across instances
+const permissionState = ref<'prompt' | 'granted' | 'denied' | 'not-needed'>('prompt')
+
+/**
+ * Request DeviceMotion permission. MUST be called from a user gesture (click/tap) on iOS.
+ * Returns true if permission was granted.
+ */
+export async function requestShakePermission(): Promise<boolean> {
+  if (!('DeviceMotionEvent' in window)) {
+    permissionState.value = 'denied'
+    return false
+  }
+
+  const DME = DeviceMotionEvent as any
+  if (typeof DME.requestPermission === 'function') {
+    try {
+      const result = await DME.requestPermission()
+      permissionState.value = result === 'granted' ? 'granted' : 'denied'
+      return result === 'granted'
+    } catch {
+      permissionState.value = 'denied'
+      return false
+    }
+  }
+
+  // Android / desktop — no permission needed
+  permissionState.value = 'not-needed'
+  return true
+}
 
 export function useShake(onShake: () => void) {
   const { settings } = useSettings()
@@ -13,16 +43,13 @@ export function useShake(onShake: () => void) {
   let lastTime = 0
   let lastShake = 0
   let listening = false
-  let permissionGranted = false
 
   function handleMotion(e: DeviceMotionEvent) {
     const acc = e.accelerationIncludingGravity
     if (!acc || acc.x == null || acc.y == null || acc.z == null) return
 
     const now = Date.now()
-    const timeDiff = now - lastTime
-
-    if (timeDiff < 100) return
+    if (now - lastTime < 100) return
     lastTime = now
 
     const deltaX = Math.abs(acc.x - lastX)
@@ -53,62 +80,17 @@ export function useShake(onShake: () => void) {
     listening = false
   }
 
-  async function requestPermissionAndStart() {
-    if (!('DeviceMotionEvent' in window)) return
-
-    const DME = DeviceMotionEvent as any
-    if (typeof DME.requestPermission === 'function') {
-      try {
-        const perm = await DME.requestPermission()
-        if (perm === 'granted') {
-          permissionGranted = true
-          startListening()
-        }
-      } catch {}
-    } else {
-      permissionGranted = true
-      startListening()
-    }
-  }
-
-  onMounted(() => {
-    // On iOS, permission must be requested from a user gesture.
-    // We attach a one-time click handler that requests permission
-    // when shakeToRoll is enabled.
-    if (!('DeviceMotionEvent' in window)) return
-
-    const DME = DeviceMotionEvent as any
-    if (typeof DME.requestPermission === 'function') {
-      document.addEventListener('click', async function requestPerm() {
-        if (!settings.shakeToRoll) return
-        try {
-          const perm = await DME.requestPermission()
-          if (perm === 'granted') {
-            permissionGranted = true
-            if (settings.shakeToRoll) startListening()
-          }
-        } catch {}
-        document.removeEventListener('click', requestPerm)
-      }, { once: true })
-    } else {
-      permissionGranted = true
-    }
-
-    // Start immediately if setting is on and no permission needed
-    if (settings.shakeToRoll && permissionGranted) {
-      startListening()
-    }
-  })
-
   watch(() => settings.shakeToRoll, (enabled) => {
-    if (enabled) {
-      if (permissionGranted) {
-        startListening()
-      } else {
-        requestPermissionAndStart()
-      }
+    if (enabled && (permissionState.value === 'granted' || permissionState.value === 'not-needed')) {
+      startListening()
     } else {
       stopListening()
+    }
+  }, { immediate: true })
+
+  watch(permissionState, (state) => {
+    if (settings.shakeToRoll && (state === 'granted' || state === 'not-needed')) {
+      startListening()
     }
   })
 
