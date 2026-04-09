@@ -1,27 +1,44 @@
 import { reactive, watch } from 'vue'
 
 export type AnimationSpeed = 'fast' | 'medium' | 'slow'
+export type GameMode = 'standard' | 'catan' | 'catan-ck'
 
 export interface Settings {
   animation: boolean
   animationSpeed: AnimationSpeed
   sound: boolean
-  catanMode: boolean
+  gameMode: GameMode
+  diceCount: number
   shakeToRoll: boolean
 }
 
 const STORAGE_KEY = 'toterninger-settings'
 
+function defaultSettings(): Settings {
+  return {
+    animation: true,
+    animationSpeed: 'medium' as AnimationSpeed,
+    sound: true,
+    gameMode: 'catan' as GameMode,
+    diceCount: 2,
+    shakeToRoll: false,
+  }
+}
+
 function loadSettings(): Settings {
   try {
     const stored = localStorage.getItem(STORAGE_KEY)
-    if (stored) return { ...defaultSettings(), ...JSON.parse(stored) }
+    if (stored) {
+      const parsed = JSON.parse(stored)
+      // Migrate old catanMode boolean
+      if ('catanMode' in parsed && !('gameMode' in parsed)) {
+        parsed.gameMode = parsed.catanMode ? 'catan' : 'standard'
+        delete parsed.catanMode
+      }
+      return { ...defaultSettings(), ...parsed }
+    }
   } catch {}
   return defaultSettings()
-}
-
-function defaultSettings(): Settings {
-  return { animation: true, animationSpeed: 'medium' as AnimationSpeed, sound: true, catanMode: true, shakeToRoll: false }
 }
 
 const settings = reactive<Settings>(loadSettings())

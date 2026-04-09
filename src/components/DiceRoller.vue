@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { ref, computed, inject } from 'vue'
 import DiceFace from './DiceFace.vue'
+import EventDie from './EventDie.vue'
+import type { EventDieValue } from './EventDie.vue'
 import { useSettings } from '../composables/useSettings'
 import type { AnimationSpeed } from '../composables/useSettings'
 import { useStatistics, statisticsKey } from '../composables/useStatistics'
@@ -15,12 +17,16 @@ const { settings } = useSettings()
 const stats = inject(statisticsKey, undefined) ?? useStatistics()
 const { addRoll, getLastRollComment } = stats
 
-const die1 = ref(1)
-const die2 = ref(1)
+const dice = ref<number[]>([1, 1])
+const eventDieValue = ref<EventDieValue>('ship')
 const rolling = ref(false)
 const hasRolled = ref(false)
 const showResult = ref(false)
-const sum = computed(() => die1.value + die2.value)
+
+const isCatan = computed(() => settings.gameMode === 'catan' || settings.gameMode === 'catan-ck')
+const isCK = computed(() => settings.gameMode === 'catan-ck')
+
+const sum = computed(() => dice.value.reduce((a, b) => a + b, 0))
 const comment = computed(() => hasRolled.value && showResult.value ? getLastRollComment() : null)
 
 const speedConfig: Record<AnimationSpeed, { frames: number; interval: number }> = {
@@ -34,8 +40,19 @@ const shakeDuration = computed(() => {
   return `${(cfg.frames * cfg.interval) / 1000}s`
 })
 
+const eventDieValues: EventDieValue[] = ['ship', 'ship', 'ship', 'green', 'blue', 'yellow']
+
 function randomDie(): number {
   return Math.floor(Math.random() * 6) + 1
+}
+
+function randomEventDie(): EventDieValue {
+  return eventDieValues[Math.floor(Math.random() * 6)]
+}
+
+function diceCount(): number {
+  if (isCatan.value) return 2
+  return settings.diceCount
 }
 
 async function roll() {
@@ -47,18 +64,21 @@ async function roll() {
     playDiceSound()
   }
 
+  const count = diceCount()
+
   if (settings.animation) {
     const { frames, interval } = speedConfig[settings.animationSpeed]
     for (let i = 0; i < frames; i++) {
-      die1.value = randomDie()
-      die2.value = randomDie()
+      dice.value = Array.from({ length: count }, randomDie)
+      if (isCK.value) eventDieValue.value = randomEventDie()
       await new Promise(r => setTimeout(r, interval))
     }
   }
 
-  die1.value = randomDie()
-  die2.value = randomDie()
-  await addRoll(die1.value, die2.value)
+  dice.value = Array.from({ length: count }, randomDie)
+  if (isCK.value) eventDieValue.value = randomEventDie()
+
+  await addRoll(dice.value[0], dice.value[1] ?? 0)
   hasRolled.value = true
   rolling.value = false
   showResult.value = true
@@ -72,19 +92,44 @@ useShake(roll)
     <div
       class="sum-display"
       :class="{
-        'robber': settings.catanMode && showResult && sum === 7,
+        'robber': isCatan && showResult && sum === 7,
         'visible': hasRolled && showResult,
       }"
     >
       <div class="sum-number">{{ hasRolled && showResult ? sum : '?' }}</div>
-      <div v-if="settings.catanMode && showResult && sum === 7" class="robber-text">
+      <div v-if="isCatan && showResult && sum === 7" class="robber-text">
         Flytt røveren!
       </div>
     </div>
 
     <div class="dice-container" :class="{ rolling: rolling && settings.animation }">
-      <DiceFace :value="die1" />
-      <DiceFace :value="die2" />
+      <!-- Standard / Catan: white dice -->
+      <template v-if="settings.gameMode === 'standard' || settings.gameMode === 'catan'">
+        <DiceFace v-for="(d, i) in dice" :key="i" :value="d" />
+      </template>
+
+      <!-- Cities & Knights: red + white + event die -->
+      <template v-if="settings.gameMode === 'catan-ck'">
+        <DiceFace :value="dice[0]" color="red" />
+        <DiceFace :value="dice[1]" color="white" />
+        <EventDie :value="eventDieValue" />
+      </template>
+    </div>
+
+    <!-- C&K: show event die result -->
+    <div v-if="isCK && hasRolled && showResult" class="event-result" :class="`event-result-${eventDieValue}`">
+      <template v-if="eventDieValue === 'ship'">
+        Barbarene rykker frem!
+      </template>
+      <template v-else-if="eventDieValue === 'green'">
+        Vitenskap (grønn) &mdash; terning: {{ dice[0] }}
+      </template>
+      <template v-else-if="eventDieValue === 'blue'">
+        Politikk (blå) &mdash; terning: {{ dice[0] }}
+      </template>
+      <template v-else-if="eventDieValue === 'yellow'">
+        Handel (gul) &mdash; terning: {{ dice[0] }}
+      </template>
     </div>
 
     <div class="roll-hint" :class="{ faded: hasRolled }">
@@ -102,7 +147,7 @@ useShake(roll)
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 20px;
+  gap: 16px;
   cursor: pointer;
   user-select: none;
   -webkit-user-select: none;
@@ -161,7 +206,9 @@ useShake(roll)
 
 .dice-container {
   display: flex;
-  gap: 24px;
+  gap: 16px;
+  flex-wrap: wrap;
+  justify-content: center;
 }
 
 .dice-container.rolling {
@@ -179,6 +226,34 @@ useShake(roll)
   70% { transform: rotate(-2deg); }
   80% { transform: rotate(1deg); }
   90% { transform: rotate(-0.5deg); }
+}
+
+.event-result {
+  font-size: 14px;
+  font-weight: 600;
+  padding: 6px 16px;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.event-result-ship {
+  background: #fef2f2;
+  color: #991b1b;
+}
+
+.event-result-green {
+  background: #f0fdf4;
+  color: #16a34a;
+}
+
+.event-result-blue {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+.event-result-yellow {
+  background: #fefce8;
+  color: #ca8a04;
 }
 
 .roll-hint {

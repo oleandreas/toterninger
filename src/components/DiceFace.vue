@@ -1,9 +1,12 @@
 <script setup lang="ts">
-defineProps<{ value: number }>()
+withDefaults(defineProps<{
+  value: number
+  color?: 'white' | 'red'
+}>(), { color: 'white' })
 </script>
 
 <template>
-  <div class="dice-face" :class="`dice-${value}`">
+  <div class="dice-face" :class="[`dice-${value}`, `dice-color-${color}`]">
     <span v-for="n in value" :key="n" class="dot" />
   </div>
 </template>
@@ -74,5 +77,14 @@ defineProps<{ value: number }>()
 .dice-6 {
   grid-template-columns: 1fr 1fr;
   grid-template-rows: 1fr 1fr 1fr;
+}
+
+/* Red die */
+.dice-color-red {
+  background: #dc2626;
+  border-color: #991b1b;
+}
+.dice-color-red .dot {
+  background: #fff;
 }
 </style>
