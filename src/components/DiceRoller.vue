@@ -6,7 +6,7 @@ import type { EventDieValue } from './EventDie.vue'
 import { useSettings } from '../composables/useSettings'
 import type { AnimationSpeed } from '../composables/useSettings'
 import { useStatistics, statisticsKey } from '../composables/useStatistics'
-import { useShake } from '../composables/useShake'
+import { useShake, requestShakePermission } from '../composables/useShake'
 import { playDiceSound } from '../composables/useSound'
 
 const props = withDefaults(defineProps<{
@@ -85,6 +85,15 @@ async function roll() {
 }
 
 useShake(roll)
+
+async function toggleShake() {
+  if (!settings.shakeToRoll) {
+    const granted = await requestShakePermission()
+    if (granted) settings.shakeToRoll = true
+  } else {
+    settings.shakeToRoll = false
+  }
+}
 </script>
 
 <template>
@@ -139,6 +148,13 @@ useShake(roll)
     </div>
 
     <div v-if="comment" class="comment">{{ comment }}</div>
+
+    <label class="shake-toggle" @click.stop="toggleShake">
+      <span class="shake-label">Rist for å kaste</span>
+      <span class="toggle-track" :class="{ on: settings.shakeToRoll }">
+        <span class="toggle-thumb" />
+      </span>
+    </label>
   </div>
 </template>
 
@@ -274,5 +290,48 @@ useShake(roll)
   border-radius: 8px;
   text-align: center;
   max-width: 300px;
+}
+
+.shake-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  padding: 6px 0;
+}
+
+.shake-label {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.toggle-track {
+  position: relative;
+  width: 40px;
+  height: 22px;
+  border-radius: 11px;
+  background: var(--border);
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+
+.toggle-track.on {
+  background: var(--accent);
+}
+
+.toggle-thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.2s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+.toggle-track.on .toggle-thumb {
+  transform: translateX(18px);
 }
 </style>
