@@ -103,7 +103,7 @@ function handleReset() {
 
 .total {
   font-size: 14px;
-  color: #888;
+  color: var(--text-muted);
 }
 
 .distribution {
@@ -128,27 +128,27 @@ function handleReset() {
 }
 
 .bar-label.seven {
-  color: #dc2626;
+  color: var(--danger);
 }
 
 .bar-track {
   flex: 1;
   height: 18px;
-  background: #e5e5e5;
+  background: var(--bar-track);
   border-radius: 4px;
   overflow: hidden;
 }
 
 .bar-fill {
   height: 100%;
-  background: #3b82f6;
+  background: var(--bar-fill);
   border-radius: 4px;
   transition: width 0.3s ease;
   min-width: 0;
 }
 
 .bar-fill.seven {
-  background: #dc2626;
+  background: var(--danger);
 }
 
 .bar-count {
@@ -160,13 +160,13 @@ function handleReset() {
 .bar-pct {
   width: 44px;
   text-align: right;
-  color: #666;
+  color: var(--text-secondary);
 }
 
 .bar-expected {
   width: 52px;
   text-align: right;
-  color: #aaa;
+  color: var(--text-faint);
   font-size: 11px;
 }
 
@@ -176,8 +176,8 @@ function handleReset() {
 
 .comment-item {
   font-size: 13px;
-  color: #666;
-  background: #f9f9f9;
+  color: var(--text-secondary);
+  background: var(--bg-subtle);
   padding: 6px 12px;
   border-radius: 6px;
   margin-bottom: 4px;
@@ -203,17 +203,17 @@ function handleReset() {
   gap: 12px;
   font-size: 13px;
   padding: 4px 8px;
-  background: #fafafa;
+  background: var(--bg-subtle);
   border-radius: 4px;
 }
 
 .history-num {
-  color: #aaa;
+  color: var(--text-faint);
   width: 36px;
 }
 
 .history-dice {
-  color: #666;
+  color: var(--text-secondary);
 }
 
 .history-sum {
@@ -221,11 +221,11 @@ function handleReset() {
 }
 
 .history-sum.seven {
-  color: #dc2626;
+  color: var(--danger);
 }
 
 .history-player {
-  color: #999;
+  color: var(--text-muted);
   font-size: 12px;
   margin-left: auto;
 }
@@ -233,17 +233,17 @@ function handleReset() {
 .reset-btn {
   width: 100%;
   padding: 10px;
-  background: #f5f5f5;
-  border: 1px solid #ddd;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
   border-radius: 8px;
   font-size: 14px;
   cursor: pointer;
-  color: #666;
+  color: var(--text-secondary);
   transition: background 0.2s;
 }
 
 .reset-btn:hover {
-  background: #eee;
-  color: #333;
+  background: var(--bg-hover);
+  color: var(--text);
 }
 </style>

@@ -109,14 +109,14 @@ window.addEventListener('hashchange', checkNewFlow)
   margin: 0;
   font-size: 22px;
   font-weight: 800;
-  color: #222;
+  color: var(--text);
 }
 
 .back-link {
   border: none;
   background: none;
   font-size: 15px;
-  color: #3b82f6;
+  color: var(--accent);
   cursor: pointer;
   padding: 4px 0;
 }
@@ -136,24 +136,24 @@ window.addEventListener('hashchange', checkNewFlow)
 
 .mp-btn {
   padding: 10px 24px;
-  background: #f5f5f5;
-  border: 1px solid #ddd;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
   border-radius: 8px;
   font-size: 14px;
-  color: #555;
+  color: var(--text-secondary);
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .mp-btn:hover {
-  background: #eee;
-  color: #333;
+  background: var(--bg-hover);
+  color: var(--text);
 }
 
 .tab-bar {
   display: flex;
-  border-top: 1px solid #e5e5e5;
-  background: #fff;
+  border-top: 1px solid var(--border);
+  background: var(--bg-card);
   padding-bottom: env(safe-area-inset-bottom, 0);
 }
 
@@ -166,22 +166,22 @@ window.addEventListener('hashchange', checkNewFlow)
   padding: 8px 4px;
   border: none;
   background: none;
-  color: #999;
+  color: var(--text-muted);
   font-size: 11px;
   cursor: pointer;
   transition: color 0.2s;
 }
 
 .tab-bar button.active {
-  color: #3b82f6;
+  color: var(--accent);
 }
 
 .tab-bar button:hover {
-  color: #555;
+  color: var(--text-secondary);
 }
 
 .tab-bar button.active:hover {
-  color: #3b82f6;
+  color: var(--accent);
 }
 
 .tab-bar svg {

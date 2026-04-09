@@ -15,18 +15,18 @@ withDefaults(defineProps<{
 .dice-face {
   width: 90px;
   height: 90px;
-  background: #fff;
+  background: var(--dice-bg);
   border-radius: 14px;
-  border: 3px solid #333;
+  border: 3px solid var(--dice-border);
   display: grid;
   padding: 12px;
-  box-shadow: 2px 3px 8px rgba(0,0,0,0.25);
+  box-shadow: 2px 3px 8px var(--dice-shadow);
 }
 
 .dot {
   width: 16px;
   height: 16px;
-  background: #222;
+  background: var(--dice-dot);
   border-radius: 50%;
   align-self: center;
   justify-self: center;

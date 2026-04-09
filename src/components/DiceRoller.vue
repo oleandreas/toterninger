@@ -163,7 +163,7 @@ useShake(roll)
 .sum-display {
   font-size: 64px;
   font-weight: 900;
-  color: #222;
+  color: var(--text);
   border-radius: 16px;
   padding: 8px 32px;
   transition: all 0.3s ease;
@@ -180,9 +180,9 @@ useShake(roll)
 }
 
 .sum-display.robber {
-  background: #dc2626;
+  background: var(--danger);
   color: white;
-  border: 4px solid #991b1b;
+  border: 4px solid var(--danger-border);
   box-shadow: 0 0 30px rgba(220, 38, 38, 0.6), 0 0 60px rgba(220, 38, 38, 0.3);
   animation: robber-pulse 0.6s ease-in-out infinite alternate;
 }
@@ -258,7 +258,7 @@ useShake(roll)
 
 .roll-hint {
   font-size: 14px;
-  color: #888;
+  color: var(--text-muted);
   transition: opacity 0.3s;
 }
 
@@ -268,8 +268,8 @@ useShake(roll)
 
 .comment {
   font-size: 14px;
-  color: #666;
-  background: #f0f0f0;
+  color: var(--text-secondary);
+  background: var(--bg-subtle);
   padding: 8px 16px;
   border-radius: 8px;
   text-align: center;

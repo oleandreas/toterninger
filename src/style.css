@@ -4,16 +4,127 @@
   box-sizing: border-box;
 }
 
+/* ============ LIGHT THEME (default) ============ */
+:root,
+[data-theme="light"] {
+  --bg: #fafafa;
+  --bg-card: #fff;
+  --bg-subtle: #f5f5f5;
+  --bg-hover: #eee;
+  --text: #222;
+  --text-secondary: #666;
+  --text-muted: #888;
+  --text-faint: #aaa;
+  --border: #e5e5e5;
+  --border-light: #eee;
+  --accent: #3b82f6;
+  --accent-bg: #eff6ff;
+  --accent-hover: #2563eb;
+  --danger: #dc2626;
+  --danger-bg: #fef2f2;
+  --danger-border: #991b1b;
+  --success: #22c55e;
+  --success-hover: #16a34a;
+  --warning: #f59e0b;
+  --warning-bg: #fef3c7;
+  --dice-bg: #fff;
+  --dice-border: #333;
+  --dice-dot: #222;
+  --dice-shadow: rgba(0,0,0,0.25);
+  --bar-track: #e5e5e5;
+  --bar-fill: #3b82f6;
+  --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* ============ DARK THEME ============ */
+[data-theme="dark"] {
+  --bg: #111118;
+  --bg-card: #1c1c26;
+  --bg-subtle: #252530;
+  --bg-hover: #2e2e3a;
+  --text: #e8e8ee;
+  --text-secondary: #a0a0b0;
+  --text-muted: #707080;
+  --text-faint: #505060;
+  --border: #2e2e3a;
+  --border-light: #252530;
+  --accent: #6390f0;
+  --accent-bg: rgba(99, 144, 240, 0.12);
+  --accent-hover: #4d7ce8;
+  --danger: #ef4444;
+  --danger-bg: rgba(239, 68, 68, 0.1);
+  --danger-border: #b91c1c;
+  --success: #34d399;
+  --success-hover: #10b981;
+  --warning: #fbbf24;
+  --warning-bg: rgba(251, 191, 36, 0.12);
+  --dice-bg: #252530;
+  --dice-border: #555;
+  --dice-dot: #e0e0e8;
+  --dice-shadow: rgba(0,0,0,0.5);
+  --bar-track: #2e2e3a;
+  --bar-fill: #6390f0;
+  --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* ============ NEON THEME (80s retro) ============ */
+[data-theme="neon"] {
+  --bg: #0a0a1a;
+  --bg-card: #12122a;
+  --bg-subtle: #1a1a35;
+  --bg-hover: #222250;
+  --text: #e0e0ff;
+  --text-secondary: #b0b0d0;
+  --text-muted: #8080a0;
+  --text-faint: #505070;
+  --border: #ff00ff44;
+  --border-light: #ff00ff22;
+  --accent: #ff00ff;
+  --accent-bg: rgba(255, 0, 255, 0.1);
+  --accent-hover: #ff44ff;
+  --danger: #ff3366;
+  --danger-bg: rgba(255, 51, 102, 0.12);
+  --danger-border: #ff3366;
+  --success: #00ff88;
+  --success-hover: #00cc66;
+  --warning: #ffff00;
+  --warning-bg: rgba(255, 255, 0, 0.1);
+  --dice-bg: #12122a;
+  --dice-border: #00ffff;
+  --dice-dot: #00ffff;
+  --dice-shadow: rgba(0, 255, 255, 0.3);
+  --bar-track: #1a1a35;
+  --bar-fill: #ff00ff;
+  --font: 'Courier New', Courier, monospace;
+}
+
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-  background: #fafafa;
-  color: #222;
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overscroll-behavior: none;
+  transition: background 0.3s, color 0.3s;
 }
 
 #app {
   height: 100dvh;
+}
+
+/* Neon glow effects */
+[data-theme="neon"] h1,
+[data-theme="neon"] h2 {
+  text-shadow: 0 0 10px #ff00ff, 0 0 30px #ff00ff66;
+}
+
+[data-theme="neon"] .tab-bar {
+  border-color: #ff00ff44;
+  background: #0a0a1a;
+}
+
+[data-theme="neon"] .tab-bar button.active {
+  color: #00ffff;
+  text-shadow: 0 0 8px #00ffff;
 }

@@ -2,6 +2,7 @@ import { reactive, watch } from 'vue'
 
 export type AnimationSpeed = 'fast' | 'medium' | 'slow'
 export type GameMode = 'standard' | 'catan' | 'catan-ck'
+export type Theme = 'light' | 'dark' | 'neon'
 
 export interface Settings {
   animation: boolean
@@ -11,6 +12,7 @@ export interface Settings {
   diceCount: number
   shakeToRoll: boolean
   turnTimeout: number // seconds, for multiplayer
+  theme: Theme
 }
 
 const STORAGE_KEY = 'toterninger-settings'
@@ -24,6 +26,7 @@ function defaultSettings(): Settings {
     diceCount: 2,
     shakeToRoll: false,
     turnTimeout: 30,
+    theme: 'light' as Theme,
   }
 }
 
@@ -45,8 +48,15 @@ function loadSettings(): Settings {
 
 const settings = reactive<Settings>(loadSettings())
 
+function applyTheme(theme: Theme) {
+  document.documentElement.dataset.theme = theme
+}
+
+applyTheme(settings.theme)
+
 watch(settings, (val) => {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(val))
+  applyTheme(val.theme)
 }, { deep: true })
 
 export function useSettings() {

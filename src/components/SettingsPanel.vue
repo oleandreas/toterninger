@@ -98,6 +98,36 @@ function setGameMode(mode: GameMode) {
     </div>
     <p class="setting-hint">Turen går automatisk videre om tiden går ut.</p>
 
+    <!-- THEME -->
+    <h2 class="section-title">Utseende</h2>
+
+    <div class="theme-modes">
+      <button
+        class="theme-btn theme-light"
+        :class="{ active: settings.theme === 'light' }"
+        @click="settings.theme = 'light'"
+      >
+        <span class="theme-preview light-preview" />
+        <span>Lyst</span>
+      </button>
+      <button
+        class="theme-btn theme-dark"
+        :class="{ active: settings.theme === 'dark' }"
+        @click="settings.theme = 'dark'"
+      >
+        <span class="theme-preview dark-preview" />
+        <span>Mørkt</span>
+      </button>
+      <button
+        class="theme-btn theme-neon"
+        :class="{ active: settings.theme === 'neon' }"
+        @click="settings.theme = 'neon'"
+      >
+        <span class="theme-preview neon-preview" />
+        <span>Neon</span>
+      </button>
+    </div>
+
     <!-- GENERAL SETTINGS -->
     <h2 class="section-title">Generelt</h2>
 
@@ -144,6 +174,7 @@ function setGameMode(mode: GameMode) {
 .settings-panel h2 {
   font-size: 20px;
   margin: 0 0 12px 0;
+  color: var(--text);
 }
 
 .section-title {
@@ -162,21 +193,21 @@ function setGameMode(mode: GameMode) {
   align-items: center;
   gap: 12px;
   padding: 12px;
-  border: 2px solid #e5e5e5;
+  border: 2px solid var(--border);
   border-radius: 10px;
-  background: #fff;
+  background: var(--bg-card);
   cursor: pointer;
   text-align: left;
   transition: all 0.2s;
 }
 
 .game-mode-btn:hover {
-  border-color: #ccc;
+  border-color: var(--text-muted);
 }
 
 .game-mode-btn.active {
-  border-color: #3b82f6;
-  background: #eff6ff;
+  border-color: var(--accent);
+  background: var(--accent-bg);
 }
 
 .gm-icon {
@@ -189,15 +220,72 @@ function setGameMode(mode: GameMode) {
 .gm-title {
   font-size: 15px;
   font-weight: 600;
-  color: #222;
+  color: var(--text);
   display: block;
 }
 
 .gm-desc {
   font-size: 12px;
-  color: #888;
+  color: var(--text-muted);
   display: block;
   margin-top: 1px;
+}
+
+/* Theme selector */
+.theme-modes {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.theme-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 8px;
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg-card);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  transition: all 0.2s;
+}
+
+.theme-btn:hover {
+  border-color: var(--text-muted);
+}
+
+.theme-btn.active {
+  border-color: var(--accent);
+}
+
+.theme-preview {
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  border: 2px solid;
+}
+
+.light-preview {
+  background: #fafafa;
+  border-color: #ddd;
+  box-shadow: inset 10px 10px 0 #fff, inset -6px -6px 0 #e5e5e5;
+}
+
+.dark-preview {
+  background: #111118;
+  border-color: #2e2e3a;
+  box-shadow: inset 10px 10px 0 #1c1c26, inset -6px -6px 0 #252530;
+}
+
+.neon-preview {
+  background: #0a0a1a;
+  border-color: #ff00ff;
+  box-shadow: inset 10px 10px 0 #12122a, 0 0 8px #ff00ff66, inset -6px -6px 0 #1a1a35;
 }
 
 .setting-row {
@@ -205,16 +293,17 @@ function setGameMode(mode: GameMode) {
   justify-content: space-between;
   align-items: center;
   padding: 12px 0;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid var(--border-light);
   cursor: pointer;
   font-size: 15px;
+  color: var(--text);
 }
 
 .setting-row input[type="checkbox"] {
   width: 20px;
   height: 20px;
   cursor: pointer;
-  accent-color: #3b82f6;
+  accent-color: var(--accent);
   pointer-events: none;
 }
 
@@ -227,12 +316,12 @@ function setGameMode(mode: GameMode) {
 .dice-count button {
   width: 32px;
   height: 32px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border);
   border-radius: 8px;
-  background: #f5f5f5;
+  background: var(--bg-subtle);
   font-size: 18px;
   cursor: pointer;
-  color: #333;
+  color: var(--text);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -258,24 +347,24 @@ function setGameMode(mode: GameMode) {
 
 .speed-buttons button {
   padding: 5px 12px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border);
   border-radius: 6px;
-  background: #f5f5f5;
+  background: var(--bg-subtle);
   font-size: 13px;
   cursor: pointer;
-  color: #666;
+  color: var(--text-secondary);
   transition: all 0.2s;
 }
 
 .speed-buttons button.active {
-  background: #3b82f6;
+  background: var(--accent);
   color: white;
-  border-color: #3b82f6;
+  border-color: var(--accent);
 }
 
 .setting-hint {
   font-size: 13px;
-  color: #888;
+  color: var(--text-muted);
   margin-top: 12px;
 }
 </style>
