@@ -4,9 +4,11 @@ import { useSession } from '../../composables/useSession'
 import { useMultiplayerStatistics } from '../../composables/useMultiplayerStatistics'
 import { statisticsKey } from '../../composables/useStatistics'
 import { useRouter } from '../../router'
+import { getPlayerId } from '../../composables/usePlayerId'
 import MultiplayerHome from './MultiplayerHome.vue'
 import Lobby from './Lobby.vue'
 import TurnIndicator from './TurnIndicator.vue'
+import PlayerList from './PlayerList.vue'
 import DiceRoller from '../DiceRoller.vue'
 import Statistics from '../Statistics.vue'
 
@@ -14,21 +16,21 @@ const props = defineProps<{ sessionId: string }>()
 
 const isNewSession = props.sessionId === '__new__'
 const actualSessionId = ref(isNewSession ? '' : props.sessionId)
+const myPlayerId = getPlayerId()
 
 const {
   session, loading, error, isHost, isMyTurn, currentPlayer, hasJoined,
+  awayPlayerIds, currentPlayerAway, turnSecondsLeft,
   listenToSession, startGame, submitRoll,
-  reorderPlayers, resetStats, restartGame,
+  reorderPlayers, removePlayer, resetStats, restartGame,
 } = useSession()
 
 const { navigate } = useRouter()
 
-// Start listening if we have a real session ID
 if (!isNewSession) {
   listenToSession(props.sessionId)
 }
 
-// Multiplayer statistics adapter
 const statsApi = useMultiplayerStatistics(
   session,
   (d1, d2) => submitRoll(actualSessionId.value, d1, d2),
@@ -36,17 +38,14 @@ const statsApi = useMultiplayerStatistics(
 )
 provide(statisticsKey, statsApi)
 
-type Tab = 'dice' | 'stats'
+type Tab = 'dice' | 'stats' | 'players'
 const activeTab = ref<Tab>('dice')
 
-// Switch to dice tab when it becomes your turn
 watch(isMyTurn, (mine) => {
   if (mine) activeTab.value = 'dice'
 })
 
 const showHostMenu = ref(false)
-
-// Track if we need name input
 const needsNameInput = ref(isNewSession)
 
 async function handleCreated(sessionId: string) {
@@ -79,16 +78,30 @@ async function handleResetStats() {
   }
 }
 
+async function handleRemovePlayer(pid: string) {
+  const player = session.value?.players.find(p => p.id === pid)
+  const name = player?.name ?? 'Spiller'
+  if (confirm(`Fjerne ${name} fra spillet?`)) {
+    await removePlayer(actualSessionId.value, pid)
+  }
+}
+
 function handleLeave() {
   navigate({ name: 'home' })
 }
 
 const disabled = computed(() => !isMyTurn.value)
+
+// Count away players for badge
+const awayCount = computed(() => {
+  if (!session.value) return 0
+  return session.value.players.filter(p => awayPlayerIds.value.has(p.id)).length
+})
 </script>
 
 <template>
   <div class="mp-game">
-    <!-- CREATE FLOW: need name input -->
+    <!-- CREATE FLOW -->
     <template v-if="needsNameInput">
       <MultiplayerHome
         :join-session-id="isNewSession ? undefined : actualSessionId"
@@ -98,9 +111,7 @@ const disabled = computed(() => !isMyTurn.value)
     </template>
 
     <!-- Loading -->
-    <div v-else-if="loading" class="center-msg">
-      Laster...
-    </div>
+    <div v-else-if="loading" class="center-msg">Laster...</div>
 
     <!-- Error -->
     <div v-else-if="error" class="center-msg">
@@ -108,12 +119,9 @@ const disabled = computed(() => !isMyTurn.value)
       <button class="link-btn" @click="handleLeave">Tilbake</button>
     </div>
 
-    <!-- Need to join (arriving via URL but not in player list) -->
+    <!-- Need to join -->
     <template v-else-if="session && !hasJoined">
-      <MultiplayerHome
-        :join-session-id="actualSessionId"
-        @joined="handleJoined"
-      />
+      <MultiplayerHome :join-session-id="actualSessionId" @joined="handleJoined" />
     </template>
 
     <!-- Lobby -->
@@ -135,7 +143,6 @@ const disabled = computed(() => !isMyTurn.value)
         <span v-else class="spacer" />
       </header>
 
-      <!-- Host menu -->
       <div v-if="showHostMenu && isHost" class="host-menu">
         <button @click="handleResetStats">Nullstill statistikk</button>
         <button @click="handleRestart">Start på nytt</button>
@@ -145,11 +152,24 @@ const disabled = computed(() => !isMyTurn.value)
         v-if="currentPlayer"
         :player-name="currentPlayer.name"
         :is-my-turn="isMyTurn"
+        :seconds-left="turnSecondsLeft"
+        :player-away="currentPlayerAway"
       />
 
       <main class="game-main">
         <DiceRoller v-if="activeTab === 'dice'" :disabled="disabled" />
         <Statistics v-else-if="activeTab === 'stats'" :can-reset="isHost" />
+        <div v-else-if="activeTab === 'players'" class="players-tab">
+          <h3>Spillere</h3>
+          <PlayerList
+            :players="session.players"
+            :current-player-index="session.currentPlayerIndex"
+            :my-player-id="myPlayerId"
+            :away-player-ids="awayPlayerIds"
+            :can-remove="isHost"
+            @remove="handleRemovePlayer"
+          />
+        </div>
       </main>
 
       <nav class="tab-bar">
@@ -170,6 +190,15 @@ const disabled = computed(() => !isMyTurn.value)
             <rect x="16" y="4" width="4" height="17" rx="1" />
           </svg>
           <span>Statistikk</span>
+        </button>
+        <button :class="{ active: activeTab === 'players' }" @click="activeTab = 'players'">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="9" cy="7" r="4" />
+            <path d="M2 21v-2a4 4 0 0 1 4-4h6a4 4 0 0 1 4 4v2" />
+            <circle cx="19" cy="7" r="3" />
+            <path d="M22 21v-1.5a3 3 0 0 0-3-3" />
+          </svg>
+          <span>Spillere{{ awayCount > 0 ? ` (${awayCount})` : '' }}</span>
         </button>
       </nav>
     </template>
@@ -227,9 +256,7 @@ const disabled = computed(() => !isMyTurn.value)
   background: #f0f0f0;
 }
 
-.spacer {
-  width: 36px;
-}
+.spacer { width: 36px; }
 
 .host-menu {
   display: flex;
@@ -248,9 +275,7 @@ const disabled = computed(() => !isMyTurn.value)
   color: #666;
 }
 
-.host-menu button:hover {
-  background: #eee;
-}
+.host-menu button:hover { background: #eee; }
 
 .game-main {
   flex: 1;
@@ -258,6 +283,18 @@ const disabled = computed(() => !isMyTurn.value)
   display: flex;
   flex-direction: column;
   justify-content: center;
+}
+
+.players-tab {
+  padding: 16px;
+  max-width: 400px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.players-tab h3 {
+  font-size: 18px;
+  margin: 0 0 12px;
 }
 
 .link-btn {
@@ -291,12 +328,6 @@ const disabled = computed(() => !isMyTurn.value)
   transition: color 0.2s;
 }
 
-.tab-bar button.active {
-  color: #3b82f6;
-}
-
-.tab-bar svg {
-  width: 22px;
-  height: 22px;
-}
+.tab-bar button.active { color: #3b82f6; }
+.tab-bar svg { width: 22px; height: 22px; }
 </style>

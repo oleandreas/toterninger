@@ -85,6 +85,19 @@ function setGameMode(mode: GameMode) {
       Rød og hvit terning + hendelsesterning med barbarer og fremskritt.
     </p>
 
+    <!-- MULTIPLAYER SETTINGS -->
+    <h2 class="section-title">Flerspiller</h2>
+
+    <div class="setting-row">
+      <span>Tid per tur</span>
+      <div class="speed-buttons">
+        <button :class="{ active: settings.turnTimeout === 15 }" @click="settings.turnTimeout = 15">15s</button>
+        <button :class="{ active: settings.turnTimeout === 30 }" @click="settings.turnTimeout = 30">30s</button>
+        <button :class="{ active: settings.turnTimeout === 60 }" @click="settings.turnTimeout = 60">60s</button>
+      </div>
+    </div>
+    <p class="setting-hint">Turen går automatisk videre om tiden går ut.</p>
+
     <!-- GENERAL SETTINGS -->
     <h2 class="section-title">Generelt</h2>
 

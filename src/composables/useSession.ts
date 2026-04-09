@@ -3,6 +3,7 @@ import { doc, setDoc, updateDoc, onSnapshot, type Unsubscribe } from 'firebase/f
 import { db } from '../firebase'
 import { getPlayerId } from './usePlayerId'
 import { generateSessionId } from '../router'
+import { useSettings } from './useSettings'
 
 export interface Player {
   id: string
@@ -26,13 +27,22 @@ export interface SessionDocument {
   players: Player[]
   currentPlayerIndex: number
   rolls: MultiplayerRoll[]
+  turnStartedAt: number
+  heartbeats: Record<string, number>
 }
 
+const HEARTBEAT_INTERVAL = 5000
+const AWAY_THRESHOLD = 15000
+
 export function useSession() {
+  const { settings } = useSettings()
   const session: Ref<SessionDocument | null> = ref(null)
   const loading = ref(false)
   const error = ref<string | null>(null)
   let unsubscribe: Unsubscribe | null = null
+  let heartbeatTimer: ReturnType<typeof setInterval> | null = null
+  let turnTimer: ReturnType<typeof setInterval> | null = null
+  let currentSessionId = ''
 
   const playerId = getPlayerId()
 
@@ -52,16 +62,111 @@ export function useSession() {
   })
   const hasJoined = computed(() => myPlayer.value !== null)
 
+  // Presence: which players are away?
+  const awayPlayerIds = computed<Set<string>>(() => {
+    const s = session.value
+    if (!s || !s.heartbeats) return new Set()
+    const now = Date.now()
+    const away = new Set<string>()
+    for (const p of s.players) {
+      const lastSeen = s.heartbeats[p.id]
+      if (!lastSeen || now - lastSeen > AWAY_THRESHOLD) {
+        away.add(p.id)
+      }
+    }
+    return away
+  })
+
+  const currentPlayerAway = computed(() => {
+    const cp = currentPlayer.value
+    if (!cp) return false
+    return awayPlayerIds.value.has(cp.id)
+  })
+
+  // Turn timer: seconds remaining
+  const turnSecondsLeft = ref<number | null>(null)
+
+  function startHeartbeat() {
+    stopHeartbeat()
+    sendHeartbeat()
+    heartbeatTimer = setInterval(sendHeartbeat, HEARTBEAT_INTERVAL)
+  }
+
+  function stopHeartbeat() {
+    if (heartbeatTimer) {
+      clearInterval(heartbeatTimer)
+      heartbeatTimer = null
+    }
+  }
+
+  async function sendHeartbeat() {
+    if (!currentSessionId || !session.value) return
+    const docRef = doc(db, 'sessions', currentSessionId)
+    try {
+      await updateDoc(docRef, { [`heartbeats.${playerId}`]: Date.now() })
+    } catch {}
+  }
+
+  function startTurnTimer() {
+    stopTurnTimer()
+    turnTimer = setInterval(() => {
+      const s = session.value
+      if (!s || s.status !== 'playing' || !s.turnStartedAt) {
+        turnSecondsLeft.value = null
+        return
+      }
+      const timeoutMs = settings.turnTimeout * 1000
+      const elapsed = Date.now() - s.turnStartedAt
+      const remaining = Math.max(0, Math.ceil((timeoutMs - elapsed) / 1000))
+      turnSecondsLeft.value = remaining
+
+      // Host auto-advances when timer runs out
+      if (remaining <= 0 && isHost.value && currentSessionId) {
+        autoAdvanceTurn()
+      }
+    }, 1000)
+  }
+
+  function stopTurnTimer() {
+    if (turnTimer) {
+      clearInterval(turnTimer)
+      turnTimer = null
+    }
+    turnSecondsLeft.value = null
+  }
+
+  async function autoAdvanceTurn() {
+    if (!session.value || !currentSessionId) return
+    const nextIndex = (session.value.currentPlayerIndex + 1) % session.value.players.length
+    const docRef = doc(db, 'sessions', currentSessionId)
+    try {
+      await updateDoc(docRef, {
+        currentPlayerIndex: nextIndex,
+        turnStartedAt: Date.now(),
+      })
+    } catch {}
+  }
+
   function listenToSession(sessionId: string) {
     if (unsubscribe) unsubscribe()
     loading.value = true
     error.value = null
+    currentSessionId = sessionId
 
     const docRef = doc(db, 'sessions', sessionId)
     unsubscribe = onSnapshot(docRef, (snap) => {
       loading.value = false
       if (snap.exists()) {
         session.value = snap.data() as SessionDocument
+        // Ensure heartbeats field exists
+        if (!session.value.heartbeats) session.value.heartbeats = {}
+
+        // Start/stop turn timer when game is playing
+        if (session.value.status === 'playing') {
+          startTurnTimer()
+        } else {
+          stopTurnTimer()
+        }
       } else {
         session.value = null
         error.value = 'Spillet finnes ikke'
@@ -70,6 +175,8 @@ export function useSession() {
       loading.value = false
       error.value = err.message
     })
+
+    startHeartbeat()
   }
 
   async function createSession(hostName: string): Promise<string> {
@@ -82,6 +189,8 @@ export function useSession() {
       players: [{ id: playerId, name: hostName }],
       currentPlayerIndex: 0,
       rolls: [],
+      turnStartedAt: 0,
+      heartbeats: { [playerId]: Date.now() },
     }
     await setDoc(docRef, data)
     listenToSession(sessionId)
@@ -109,12 +218,20 @@ export function useSession() {
 
     const docRef = doc(db, 'sessions', sessionId)
     const updatedPlayers = [...session.value.players, { id: playerId, name: playerName }]
-    await updateDoc(docRef, { players: updatedPlayers })
+    await updateDoc(docRef, {
+      players: updatedPlayers,
+      [`heartbeats.${playerId}`]: Date.now(),
+    })
   }
 
   async function startGame(sessionId: string) {
     const docRef = doc(db, 'sessions', sessionId)
-    await updateDoc(docRef, { status: 'playing', currentPlayerIndex: 0, rolls: [] })
+    await updateDoc(docRef, {
+      status: 'playing',
+      currentPlayerIndex: 0,
+      rolls: [],
+      turnStartedAt: Date.now(),
+    })
   }
 
   async function submitRoll(sessionId: string, die1: number, die2: number) {
@@ -135,7 +252,11 @@ export function useSession() {
     const updatedRolls = [...session.value.rolls, roll]
 
     const docRef = doc(db, 'sessions', sessionId)
-    await updateDoc(docRef, { rolls: updatedRolls, currentPlayerIndex: nextIndex })
+    await updateDoc(docRef, {
+      rolls: updatedRolls,
+      currentPlayerIndex: nextIndex,
+      turnStartedAt: Date.now(),
+    })
   }
 
   async function reorderPlayers(sessionId: string, newOrder: Player[]) {
@@ -143,14 +264,37 @@ export function useSession() {
     await updateDoc(docRef, { players: newOrder })
   }
 
+  async function removePlayer(sessionId: string, removePlayerId: string) {
+    if (!session.value) return
+    const updatedPlayers = session.value.players.filter(p => p.id !== removePlayerId)
+    if (updatedPlayers.length === 0) return
+
+    // Adjust currentPlayerIndex if needed
+    let idx = session.value.currentPlayerIndex
+    const removedIdx = session.value.players.findIndex(p => p.id === removePlayerId)
+    if (removedIdx < idx) {
+      idx = idx - 1
+    } else if (removedIdx === idx) {
+      idx = idx % updatedPlayers.length
+    }
+    if (idx >= updatedPlayers.length) idx = 0
+
+    const docRef = doc(db, 'sessions', sessionId)
+    await updateDoc(docRef, {
+      players: updatedPlayers,
+      currentPlayerIndex: idx,
+      turnStartedAt: Date.now(),
+    })
+  }
+
   async function resetStats(sessionId: string) {
     const docRef = doc(db, 'sessions', sessionId)
-    await updateDoc(docRef, { rolls: [], currentPlayerIndex: 0 })
+    await updateDoc(docRef, { rolls: [], currentPlayerIndex: 0, turnStartedAt: Date.now() })
   }
 
   async function restartGame(sessionId: string) {
     const docRef = doc(db, 'sessions', sessionId)
-    await updateDoc(docRef, { status: 'lobby', rolls: [], currentPlayerIndex: 0 })
+    await updateDoc(docRef, { status: 'lobby', rolls: [], currentPlayerIndex: 0, turnStartedAt: 0 })
   }
 
   function stopListening() {
@@ -158,6 +302,8 @@ export function useSession() {
       unsubscribe()
       unsubscribe = null
     }
+    stopHeartbeat()
+    stopTurnTimer()
   }
 
   onUnmounted(stopListening)
@@ -171,12 +317,16 @@ export function useSession() {
     currentPlayer,
     myPlayer,
     hasJoined,
+    awayPlayerIds,
+    currentPlayerAway,
+    turnSecondsLeft,
     listenToSession,
     createSession,
     joinSession,
     startGame,
     submitRoll,
     reorderPlayers,
+    removePlayer,
     resetStats,
     restartGame,
     stopListening,

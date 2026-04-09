@@ -10,6 +10,7 @@ export interface Settings {
   gameMode: GameMode
   diceCount: number
   shakeToRoll: boolean
+  turnTimeout: number // seconds, for multiplayer
 }
 
 const STORAGE_KEY = 'toterninger-settings'
@@ -22,6 +23,7 @@ function defaultSettings(): Settings {
     gameMode: 'catan' as GameMode,
     diceCount: 2,
     shakeToRoll: false,
+    turnTimeout: 30,
   }
 }
 
