@@ -23,26 +23,26 @@ const labels: Record<EventDieValue, string> = {
 
 <style scoped>
 .event-die {
-  width: 90px;
-  height: 90px;
+  width: min(90px, 22vw);
+  height: min(90px, 22vw);
   border-radius: 14px;
-  border: 3px solid #333;
+  border: 3px solid var(--dice-border);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 2px;
-  box-shadow: 2px 3px 8px rgba(0,0,0,0.25);
-  background: #fff;
+  box-shadow: 2px 3px 8px var(--dice-shadow);
+  background: var(--bg-card);
 }
 
 .event-icon {
-  font-size: 32px;
+  font-size: min(32px, 8vw);
   line-height: 1;
 }
 
 .event-label {
-  font-size: 10px;
+  font-size: min(10px, 2.5vw);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;

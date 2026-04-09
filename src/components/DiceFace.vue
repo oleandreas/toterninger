@@ -13,19 +13,19 @@ withDefaults(defineProps<{
 
 <style scoped>
 .dice-face {
-  width: 90px;
-  height: 90px;
+  width: min(90px, 22vw);
+  height: min(90px, 22vw);
   background: var(--dice-bg);
   border-radius: 14px;
   border: 3px solid var(--dice-border);
   display: grid;
-  padding: 12px;
+  padding: min(12px, 3vw);
   box-shadow: 2px 3px 8px var(--dice-shadow);
 }
 
 .dot {
-  width: 16px;
-  height: 16px;
+  width: min(16px, 4vw);
+  height: min(16px, 4vw);
   background: var(--dice-dot);
   border-radius: 50%;
   align-self: center;

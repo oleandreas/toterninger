@@ -99,7 +99,7 @@ h3 {
 .share-text {
   margin: 0;
   font-size: 14px;
-  color: #666;
+  color: var(--text-secondary);
 }
 
 .url-box {
@@ -107,8 +107,9 @@ h3 {
   align-items: center;
   gap: 8px;
   padding: 10px 14px;
-  background: #f5f5f5;
-  border: 1px solid #ddd;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  overflow: hidden;
   border-radius: 8px;
   cursor: pointer;
   width: 100%;
@@ -116,7 +117,7 @@ h3 {
 }
 
 .url-box:hover {
-  background: #eee;
+  background: var(--bg-hover);
 }
 
 .url-text {

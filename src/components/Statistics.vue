@@ -116,12 +116,14 @@ function handleReset() {
 .bar-row {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   font-size: 13px;
+  min-width: 0;
 }
 
 .bar-label {
-  width: 24px;
+  width: 22px;
+  flex-shrink: 0;
   text-align: right;
   font-weight: 700;
   font-size: 14px;
@@ -133,6 +135,7 @@ function handleReset() {
 
 .bar-track {
   flex: 1;
+  min-width: 0;
   height: 18px;
   background: var(--bar-track);
   border-radius: 4px;
@@ -152,22 +155,30 @@ function handleReset() {
 }
 
 .bar-count {
-  width: 28px;
+  width: 24px;
+  flex-shrink: 0;
   text-align: right;
   font-weight: 600;
 }
 
 .bar-pct {
-  width: 44px;
+  width: 40px;
+  flex-shrink: 0;
   text-align: right;
   color: var(--text-secondary);
 }
 
 .bar-expected {
-  width: 52px;
+  width: 48px;
+  flex-shrink: 0;
   text-align: right;
   color: var(--text-faint);
   font-size: 11px;
+}
+
+@media (max-width: 380px) {
+  .bar-expected { display: none; }
+  .bar-pct { width: 36px; }
 }
 
 .comments {

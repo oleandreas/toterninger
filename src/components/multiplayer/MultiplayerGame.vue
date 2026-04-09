@@ -238,7 +238,7 @@ const awayCount = computed(() => {
   font-size: 20px;
   font-weight: 800;
   text-align: center;
-  color: #222;
+  color: var(--text);
 }
 
 .back-btn, .menu-btn {
@@ -248,12 +248,12 @@ const awayCount = computed(() => {
   background: none;
   font-size: 20px;
   cursor: pointer;
-  color: #666;
+  color: var(--text-secondary);
   border-radius: 8px;
 }
 
 .back-btn:hover, .menu-btn:hover {
-  background: #f0f0f0;
+  background: var(--bg-subtle);
 }
 
 .spacer { width: 36px; }
@@ -267,15 +267,15 @@ const awayCount = computed(() => {
 
 .host-menu button {
   padding: 6px 14px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border);
   border-radius: 6px;
-  background: #f9f9f9;
+  background: var(--bg-subtle);
   font-size: 13px;
   cursor: pointer;
-  color: #666;
+  color: var(--text-secondary);
 }
 
-.host-menu button:hover { background: #eee; }
+.host-menu button:hover { background: var(--bg-hover); }
 
 .game-main {
   flex: 1;
@@ -300,7 +300,7 @@ const awayCount = computed(() => {
 .link-btn {
   background: none;
   border: none;
-  color: #3b82f6;
+  color: var(--accent);
   font-size: 15px;
   cursor: pointer;
   text-decoration: underline;
@@ -308,8 +308,8 @@ const awayCount = computed(() => {
 
 .tab-bar {
   display: flex;
-  border-top: 1px solid #e5e5e5;
-  background: #fff;
+  border-top: 1px solid var(--border);
+  background: var(--bg-card);
   padding-bottom: env(safe-area-inset-bottom, 0);
 }
 
@@ -322,12 +322,12 @@ const awayCount = computed(() => {
   padding: 8px 4px;
   border: none;
   background: none;
-  color: #999;
+  color: var(--text-muted);
   font-size: 11px;
   cursor: pointer;
   transition: color 0.2s;
 }
 
-.tab-bar button.active { color: #3b82f6; }
+.tab-bar button.active { color: var(--accent); }
 .tab-bar svg { width: 22px; height: 22px; }
 </style>

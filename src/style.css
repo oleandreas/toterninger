@@ -98,6 +98,11 @@
   --font: 'Courier New', Courier, monospace;
 }
 
+html, body {
+  overflow-x: hidden;
+  width: 100%;
+}
+
 body {
   margin: 0;
   font-family: var(--font);
@@ -111,6 +116,7 @@ body {
 
 #app {
   height: 100dvh;
+  overflow-x: hidden;
 }
 
 /* Neon glow effects */
