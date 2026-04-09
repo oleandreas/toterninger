@@ -5,7 +5,14 @@ const SHAKE_THRESHOLD = 15
 const SHAKE_TIMEOUT = 1000
 
 // Shared permission state across instances
-const permissionState = ref<'prompt' | 'granted' | 'denied' | 'not-needed'>('prompt')
+// Determine initial state: if no requestPermission method, permission is not needed
+const initialPermission = (() => {
+  if (!('DeviceMotionEvent' in window)) return 'denied' as const
+  const DME = DeviceMotionEvent as any
+  if (typeof DME.requestPermission === 'function') return 'prompt' as const
+  return 'not-needed' as const
+})()
+const permissionState = ref<'prompt' | 'granted' | 'denied' | 'not-needed'>(initialPermission)
 
 /**
  * Request DeviceMotion permission. MUST be called from a user gesture (click/tap) on iOS.
