@@ -87,13 +87,22 @@ export function useShake(onShake: () => void) {
     listening = false
   }
 
+  // On load, if shakeToRoll is already on, cycle the listener off/on
+  // so the browser registers the event listener fresh
+  if (settings.shakeToRoll && (permissionState.value === 'granted' || permissionState.value === 'not-needed')) {
+    stopListening()
+    setTimeout(() => {
+      if (settings.shakeToRoll) startListening()
+    }, 100)
+  }
+
   watch(() => settings.shakeToRoll, (enabled) => {
     if (enabled && (permissionState.value === 'granted' || permissionState.value === 'not-needed')) {
       startListening()
     } else {
       stopListening()
     }
-  }, { immediate: true })
+  })
 
   watch(permissionState, (state) => {
     if (settings.shakeToRoll && (state === 'granted' || state === 'not-needed')) {
