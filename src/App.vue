@@ -32,10 +32,10 @@ window.addEventListener('hashchange', checkNewFlow)
     <!-- SOLO MODE -->
     <template v-if="route.name === 'home' && !showCreateFlow">
       <header class="app-header">
-        <h1>Toterninger</h1>
+        <h1>To terninger</h1>
       </header>
 
-      <main class="app-main">
+      <main class="app-main" :class="{ 'app-main-top': activeTab !== 'dice' }">
         <DiceRoller v-if="activeTab === 'dice'" />
         <Statistics v-else-if="activeTab === 'stats'" />
         <SettingsPanel v-else-if="activeTab === 'settings'" />
@@ -127,6 +127,10 @@ window.addEventListener('hashchange', checkNewFlow)
   display: flex;
   flex-direction: column;
   justify-content: center;
+}
+
+.app-main-top {
+  justify-content: flex-start;
 }
 
 .multiplayer-cta {

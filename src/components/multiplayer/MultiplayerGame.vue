@@ -156,7 +156,7 @@ const awayCount = computed(() => {
         :player-away="currentPlayerAway"
       />
 
-      <main class="game-main">
+      <main class="game-main" :class="{ 'game-main-top': activeTab !== 'dice' }">
         <DiceRoller v-if="activeTab === 'dice'" :disabled="disabled" />
         <Statistics v-else-if="activeTab === 'stats'" :can-reset="isHost" />
         <div v-else-if="activeTab === 'players'" class="players-tab">
@@ -283,6 +283,10 @@ const awayCount = computed(() => {
   display: flex;
   flex-direction: column;
   justify-content: center;
+}
+
+.game-main-top {
+  justify-content: flex-start;
 }
 
 .players-tab {
