@@ -146,8 +146,24 @@ const awayCount = computed(() => {
       <header class="game-header">
         <button class="back-btn" @click="handleLeave">&#8592;</button>
         <h1>Toterninger</h1>
+        <button
+          class="icon-btn"
+          @click="settings.turnSound = !settings.turnSound"
+          :aria-label="settings.turnSound ? 'Skru av lyd når det blir min tur' : 'Skru på lyd når det blir min tur'"
+          :title="settings.turnSound ? 'Tur-lyd: på' : 'Tur-lyd: av'"
+        >
+          <svg v-if="settings.turnSound" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+            <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+            <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+          </svg>
+          <svg v-else width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+            <line x1="22" y1="9" x2="16" y2="15" />
+            <line x1="16" y1="9" x2="22" y2="15" />
+          </svg>
+        </button>
         <button v-if="isHost" class="menu-btn" @click="showHostMenu = !showHostMenu">&#8942;</button>
-        <span v-else class="spacer" />
       </header>
 
       <div v-if="showHostMenu && isHost" class="host-menu">
@@ -254,7 +270,7 @@ const awayCount = computed(() => {
   color: var(--text);
 }
 
-.back-btn, .menu-btn {
+.back-btn, .menu-btn, .icon-btn {
   width: 36px;
   height: 36px;
   border: none;
@@ -263,13 +279,15 @@ const awayCount = computed(() => {
   cursor: pointer;
   color: var(--text-secondary);
   border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.back-btn:hover, .menu-btn:hover {
+.back-btn:hover, .menu-btn:hover, .icon-btn:hover {
   background: var(--bg-subtle);
+  color: var(--text);
 }
-
-.spacer { width: 36px; }
 
 .host-menu {
   display: flex;
