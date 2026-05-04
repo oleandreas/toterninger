@@ -281,15 +281,21 @@ export function useSession() {
       playerId: player.id,
       playerName: player.name,
     }
-    const nextIndex = (session.value.currentPlayerIndex + 1) % session.value.players.length
     const updatedRolls = [...session.value.rolls, roll]
-
     const docRef = doc(db, 'sessions', sessionId)
-    await updateDoc(docRef, {
-      rolls: updatedRolls,
-      currentPlayerIndex: nextIndex,
-      turnStartedAt: Date.now(),
-    })
+
+    // Auto-advance on roll only in timer mode. In 'manual' / 'admin' the
+    // turn is held until someone presses "Gi turen videre" / "Neste spiller".
+    if (typeof session.value.turnTimeout === 'number') {
+      const nextIndex = (session.value.currentPlayerIndex + 1) % session.value.players.length
+      await updateDoc(docRef, {
+        rolls: updatedRolls,
+        currentPlayerIndex: nextIndex,
+        turnStartedAt: Date.now(),
+      })
+    } else {
+      await updateDoc(docRef, { rolls: updatedRolls })
+    }
   }
 
   async function reorderPlayers(sessionId: string, newOrder: Player[]) {

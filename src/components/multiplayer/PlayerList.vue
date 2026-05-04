@@ -73,15 +73,16 @@ function moveDown(index: number) {
   align-items: center;
   gap: 8px;
   padding: 10px 12px;
-  background: #f9f9f9;
+  background: var(--bg-subtle);
+  color: var(--text);
   border-radius: 8px;
   border: 2px solid transparent;
   transition: all 0.2s;
 }
 
 .player-item.current {
-  border-color: #3b82f6;
-  background: #eff6ff;
+  border-color: var(--accent);
+  background: var(--accent-bg);
 }
 
 .player-item.me .player-name {
@@ -89,7 +90,7 @@ function moveDown(index: number) {
 }
 
 .player-index {
-  color: #999;
+  color: var(--text-muted);
   font-size: 13px;
   width: 20px;
 }
@@ -100,7 +101,7 @@ function moveDown(index: number) {
 }
 
 .me-tag {
-  color: #3b82f6;
+  color: var(--accent);
   font-size: 12px;
   font-weight: 400;
 }
@@ -114,13 +115,13 @@ function moveDown(index: number) {
 .move-btn {
   width: 28px;
   height: 22px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border);
   border-radius: 4px;
-  background: #fff;
+  background: var(--bg-card);
   cursor: pointer;
   font-size: 10px;
   line-height: 1;
-  color: #666;
+  color: var(--text-secondary);
   padding: 0;
 }
 
@@ -135,23 +136,24 @@ function moveDown(index: number) {
 
 .away-tag {
   font-size: 11px;
-  color: #f59e0b;
+  color: var(--warning);
   font-weight: 600;
   margin-left: 4px;
 }
 
 .remove-btn {
   padding: 3px 10px;
-  border: 1px solid #fca5a5;
+  border: 1px solid var(--danger);
   border-radius: 4px;
-  background: #fef2f2;
-  color: #dc2626;
+  background: var(--danger-bg);
+  color: var(--danger);
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
 }
 
 .remove-btn:hover {
-  background: #fee2e2;
+  background: var(--danger);
+  color: #fff;
 }
 </style>

@@ -125,18 +125,18 @@ h3 {
   font-size: 13px;
   word-break: break-all;
   text-align: left;
-  color: #333;
+  color: var(--text);
 }
 
 .copy-hint {
   font-size: 12px;
-  color: #3b82f6;
+  color: var(--accent);
   font-weight: 600;
   white-space: nowrap;
 }
 
 .waiting-section p {
-  color: #888;
+  color: var(--text-muted);
   font-size: 15px;
 }
 
@@ -144,8 +144,8 @@ h3 {
   margin-top: 20px;
   width: 100%;
   padding: 14px;
-  background: #22c55e;
-  color: white;
+  background: var(--success);
+  color: #fff;
   border: none;
   border-radius: 8px;
   font-size: 16px;
@@ -155,7 +155,7 @@ h3 {
 }
 
 .start-btn:hover:not(:disabled) {
-  background: #16a34a;
+  background: var(--success-hover);
 }
 
 .start-btn:disabled {
@@ -165,7 +165,7 @@ h3 {
 
 .hint {
   font-size: 13px;
-  color: #999;
+  color: var(--text-muted);
   margin: 8px 0 0;
 }
 </style>

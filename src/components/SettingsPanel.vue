@@ -109,6 +109,11 @@ function setGameMode(mode: GameMode) {
     </p>
     <p class="setting-hint">Gjelder for nye spill du oppretter.</p>
 
+    <label class="setting-row">
+      <span>Lyd når det blir min tur</span>
+      <input type="checkbox" v-model="settings.turnSound" />
+    </label>
+
     <!-- THEME -->
     <h2 class="section-title">Utseende</h2>
 

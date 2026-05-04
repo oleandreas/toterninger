@@ -3,6 +3,8 @@ import { ref, provide, computed, watch } from 'vue'
 import { useSession } from '../../composables/useSession'
 import { useMultiplayerStatistics } from '../../composables/useMultiplayerStatistics'
 import { statisticsKey } from '../../composables/useStatistics'
+import { useSettings } from '../../composables/useSettings'
+import { playTurnSound } from '../../composables/useSound'
 import { useRouter } from '../../router'
 import { getPlayerId } from '../../composables/usePlayerId'
 import MultiplayerHome from './MultiplayerHome.vue'
@@ -41,8 +43,13 @@ provide(statisticsKey, statsApi)
 type Tab = 'dice' | 'stats' | 'players'
 const activeTab = ref<Tab>('dice')
 
-watch(isMyTurn, (mine) => {
-  if (mine) activeTab.value = 'dice'
+const { settings } = useSettings()
+
+watch(isMyTurn, (mine, wasMine) => {
+  if (mine && !wasMine) {
+    activeTab.value = 'dice'
+    if (settings.turnSound) playTurnSound()
+  }
 })
 
 const showHostMenu = ref(false)
@@ -226,7 +233,7 @@ const awayCount = computed(() => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  color: #888;
+  color: var(--text-muted);
   font-size: 16px;
   gap: 12px;
 }

@@ -13,6 +13,7 @@ export interface Settings {
   diceCount: number
   shakeToRoll: boolean
   turnTimeout: TurnTimeout // seconds (number) | 'manual' (active player advances) | 'admin' (host advances)
+  turnSound: boolean // play a chime when it becomes your turn (multiplayer)
   theme: Theme
 }
 
@@ -27,6 +28,7 @@ function defaultSettings(): Settings {
     diceCount: 2,
     shakeToRoll: false,
     turnTimeout: 30,
+    turnSound: false,
     theme: 'light' as Theme,
   }
 }

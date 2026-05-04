@@ -103,26 +103,29 @@ h2 {
   gap: 6px;
   text-align: left;
   font-size: 14px;
-  color: #666;
+  color: var(--text-secondary);
 }
 
 .field input {
   padding: 10px 12px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border);
   border-radius: 8px;
   font-size: 16px;
   outline: none;
+  background: var(--bg-card);
+  color: var(--text);
+  font-family: inherit;
   transition: border-color 0.2s;
 }
 
 .field input:focus {
-  border-color: #3b82f6;
+  border-color: var(--accent);
 }
 
 .primary-btn {
   padding: 12px;
-  background: #3b82f6;
-  color: white;
+  background: var(--accent);
+  color: #fff;
   border: none;
   border-radius: 8px;
   font-size: 16px;
@@ -132,7 +135,7 @@ h2 {
 }
 
 .primary-btn:hover:not(:disabled) {
-  background: #2563eb;
+  background: var(--accent-hover);
 }
 
 .primary-btn:disabled {
@@ -141,7 +144,7 @@ h2 {
 }
 
 .error {
-  color: #dc2626;
+  color: var(--danger);
   font-size: 14px;
   margin: 0;
 }

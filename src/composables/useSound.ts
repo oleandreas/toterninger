@@ -44,3 +44,27 @@ export function playDiceSound() {
   chime.start(now + 0.4)
   chime.stop(now + 0.8)
 }
+
+export function playTurnSound() {
+  const ctx = getAudioContext()
+  const now = ctx.currentTime
+
+  // Two-tone bell — friendly "your turn" announcement (E5 then A5)
+  const tones: Array<{ freq: number; offset: number }> = [
+    { freq: 660, offset: 0 },
+    { freq: 880, offset: 0.18 },
+  ]
+  for (const t of tones) {
+    const osc = ctx.createOscillator()
+    const gain = ctx.createGain()
+    osc.type = 'sine'
+    osc.frequency.setValueAtTime(t.freq, now + t.offset)
+    gain.gain.setValueAtTime(0.0001, now + t.offset)
+    gain.gain.exponentialRampToValueAtTime(0.18, now + t.offset + 0.02)
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + t.offset + 0.55)
+    osc.connect(gain)
+    gain.connect(ctx.destination)
+    osc.start(now + t.offset)
+    osc.stop(now + t.offset + 0.6)
+  }
+}

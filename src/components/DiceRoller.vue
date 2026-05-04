@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, inject } from 'vue'
+import { ref, computed, inject, onMounted, watch } from 'vue'
 import DiceFace from './DiceFace.vue'
 import EventDie from './EventDie.vue'
 import type { EventDieValue } from './EventDie.vue'
@@ -8,13 +8,17 @@ import type { AnimationSpeed } from '../composables/useSettings'
 import { useStatistics, statisticsKey } from '../composables/useStatistics'
 import { useShake, requestShakePermission } from '../composables/useShake'
 import { playDiceSound } from '../composables/useSound'
+import { getPlayerId } from '../composables/usePlayerId'
 
 const props = withDefaults(defineProps<{
   disabled?: boolean
 }>(), { disabled: false })
 
 const { settings } = useSettings()
-const stats = inject(statisticsKey, undefined) ?? useStatistics()
+const injectedStats = inject(statisticsKey, undefined)
+const stats = injectedStats ?? useStatistics()
+const isMultiplayer = !!injectedStats
+const myPlayerId = getPlayerId()
 const { addRoll, getLastRollComment } = stats
 
 const dice = ref<number[]>([1, 1])
@@ -85,6 +89,54 @@ async function roll() {
 }
 
 useShake(roll)
+
+// In multiplayer, mirror other players' rolls so non-rollers see the result.
+onMounted(() => {
+  if (!isMultiplayer) return
+  const rolls = stats.stats.rolls
+  if (rolls.length === 0) return
+  const last = rolls[rolls.length - 1]
+  dice.value = [last.die1, last.die2]
+  hasRolled.value = true
+  showResult.value = true
+})
+
+watch(
+  () => stats.stats.rolls.length,
+  async (newLen, oldLen) => {
+    if (!isMultiplayer) return
+    if (newLen === 0 || newLen <= oldLen) return
+    const last = stats.stats.rolls[newLen - 1]
+    if (last.playerId === myPlayerId) return // already animated locally by roll()
+
+    // Initial load or bulk catch-up: hydrate without animation
+    if (oldLen === 0 || newLen - oldLen > 1) {
+      dice.value = [last.die1, last.die2]
+      hasRolled.value = true
+      showResult.value = true
+      return
+    }
+
+    // Single new roll from another player — animate it
+    if (rolling.value) return
+    rolling.value = true
+    showResult.value = false
+    if (settings.sound) playDiceSound()
+
+    if (settings.animation) {
+      const { frames, interval } = speedConfig[settings.animationSpeed]
+      for (let i = 0; i < frames; i++) {
+        dice.value = [randomDie(), randomDie()]
+        await new Promise(r => setTimeout(r, interval))
+      }
+    }
+
+    dice.value = [last.die1, last.die2]
+    hasRolled.value = true
+    rolling.value = false
+    showResult.value = true
+  }
+)
 
 async function toggleShake() {
   if (!settings.shakeToRoll) {

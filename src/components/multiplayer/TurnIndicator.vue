@@ -30,8 +30,8 @@ defineProps<{
   padding: 10px 16px;
   font-size: 16px;
   font-weight: 600;
-  color: #666;
-  background: #f5f5f5;
+  color: var(--text-secondary);
+  background: var(--bg-subtle);
   border-radius: 10px;
   margin: 0 16px;
   transition: all 0.3s;
@@ -39,18 +39,18 @@ defineProps<{
 
 .turn-indicator.my-turn {
   color: #fff;
-  background: #3b82f6;
+  background: var(--accent);
   animation: pulse-turn 1.5s ease-in-out infinite alternate;
 }
 
 .turn-indicator.away:not(.my-turn) {
-  background: #fef3c7;
-  color: #92400e;
+  background: var(--warning-bg);
+  color: var(--warning);
 }
 
 @keyframes pulse-turn {
-  from { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4); }
-  to { box-shadow: 0 0 12px 4px rgba(59, 130, 246, 0.2); }
+  from { box-shadow: 0 0 0 0 rgba(99, 144, 240, 0.4); }
+  to { box-shadow: 0 0 12px 4px rgba(99, 144, 240, 0.25); }
 }
 
 .turn-text {
@@ -61,8 +61,8 @@ defineProps<{
   font-size: 11px;
   padding: 2px 8px;
   border-radius: 4px;
-  background: #f59e0b;
-  color: #fff;
+  background: var(--warning);
+  color: #1a1a1a;
   font-weight: 700;
   text-transform: uppercase;
 }
@@ -82,12 +82,12 @@ defineProps<{
 }
 
 .timer.urgent {
-  color: #dc2626;
-  background: rgba(220, 38, 38, 0.1);
+  color: var(--danger);
+  background: var(--danger-bg);
 }
 
 .my-turn .timer.urgent {
-  color: #fef2f2;
-  background: rgba(220, 38, 38, 0.4);
+  color: #fff;
+  background: var(--danger);
 }
 </style>
