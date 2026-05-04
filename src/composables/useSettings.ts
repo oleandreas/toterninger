@@ -3,6 +3,7 @@ import { reactive, watch } from 'vue'
 export type AnimationSpeed = 'fast' | 'medium' | 'slow'
 export type GameMode = 'standard' | 'catan' | 'catan-ck'
 export type Theme = 'light' | 'dark' | 'neon'
+export type TurnTimeout = number | 'manual' | 'admin'
 
 export interface Settings {
   animation: boolean
@@ -11,7 +12,7 @@ export interface Settings {
   gameMode: GameMode
   diceCount: number
   shakeToRoll: boolean
-  turnTimeout: number // seconds, for multiplayer
+  turnTimeout: TurnTimeout // seconds (number) | 'manual' (active player advances) | 'admin' (host advances)
   theme: Theme
 }
 

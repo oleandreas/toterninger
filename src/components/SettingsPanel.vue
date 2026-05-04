@@ -88,15 +88,26 @@ function setGameMode(mode: GameMode) {
     <!-- MULTIPLAYER SETTINGS -->
     <h2 class="section-title">Flerspiller</h2>
 
-    <div class="setting-row">
+    <div class="setting-row turn-row">
       <span>Tid per tur</span>
       <div class="speed-buttons">
         <button :class="{ active: settings.turnTimeout === 15 }" @click="settings.turnTimeout = 15">15s</button>
         <button :class="{ active: settings.turnTimeout === 30 }" @click="settings.turnTimeout = 30">30s</button>
         <button :class="{ active: settings.turnTimeout === 60 }" @click="settings.turnTimeout = 60">60s</button>
+        <button :class="{ active: settings.turnTimeout === 'manual' }" @click="settings.turnTimeout = 'manual'">Manuell</button>
+        <button :class="{ active: settings.turnTimeout === 'admin' }" @click="settings.turnTimeout = 'admin'">Admin</button>
       </div>
     </div>
-    <p class="setting-hint">Turen går automatisk videre om tiden går ut.</p>
+    <p class="setting-hint" v-if="typeof settings.turnTimeout === 'number'">
+      Turen går automatisk videre om tiden går ut.
+    </p>
+    <p class="setting-hint" v-else-if="settings.turnTimeout === 'manual'">
+      Den som har turen trykker selv "Neste" for å gi den videre.
+    </p>
+    <p class="setting-hint" v-else>
+      Bare verten kan gi turen videre.
+    </p>
+    <p class="setting-hint">Gjelder for nye spill du oppretter.</p>
 
     <!-- THEME -->
     <h2 class="section-title">Utseende</h2>
@@ -343,6 +354,13 @@ function setGameMode(mode: GameMode) {
 .speed-buttons {
   display: flex;
   gap: 4px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.turn-row {
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .speed-buttons button {

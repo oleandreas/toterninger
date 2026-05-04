@@ -1,6 +1,11 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+import { doc, getDoc } from 'firebase/firestore'
 import { useRouter } from './router'
+import { db } from './firebase'
+import { getLastSession, clearLastSession, type LastSession } from './lastSession'
+import { getPlayerId } from './composables/usePlayerId'
+import type { SessionDocument } from './composables/useSession'
 import DiceRoller from './components/DiceRoller.vue'
 import Statistics from './components/Statistics.vue'
 import SettingsPanel from './components/SettingsPanel.vue'
@@ -26,12 +31,64 @@ function checkNewFlow() {
 }
 checkNewFlow()
 window.addEventListener('hashchange', checkNewFlow)
+
+// --- Reconnect prompt ---
+const reconnectPrompt = ref<LastSession | null>(null)
+
+async function checkLastSession() {
+  const last = getLastSession()
+  if (!last) return
+  try {
+    const snap = await getDoc(doc(db, 'sessions', last.sessionId))
+    if (!snap.exists()) {
+      clearLastSession()
+      return
+    }
+    const session = snap.data() as SessionDocument
+    if (session.status !== 'lobby' && session.status !== 'playing') {
+      clearLastSession()
+      return
+    }
+    if (!session.players.some(p => p.id === getPlayerId())) {
+      clearLastSession()
+      return
+    }
+    reconnectPrompt.value = last
+  } catch {
+    // Network/permission error — leave the saved session, try again next visit
+  }
+}
+
+function acceptReconnect() {
+  if (!reconnectPrompt.value) return
+  navigate({ name: 'session', sessionId: reconnectPrompt.value.sessionId })
+  reconnectPrompt.value = null
+}
+
+function dismissReconnect() {
+  clearLastSession()
+  reconnectPrompt.value = null
+}
+
+onMounted(() => {
+  if (route.value.name === 'home' && !showCreateFlow.value) checkLastSession()
+})
 </script>
 
 <template>
   <div class="app">
     <!-- SOLO MODE -->
     <template v-if="route.name === 'home' && !showCreateFlow">
+      <div v-if="reconnectPrompt" class="reconnect-banner">
+        <span class="reconnect-text">
+          Gjenoppta spillet som <strong>{{ reconnectPrompt.name }}</strong>?
+        </span>
+        <div class="reconnect-actions">
+          <button class="reconnect-yes" @click="acceptReconnect">Ja</button>
+          <button class="reconnect-no" @click="dismissReconnect">Nei</button>
+        </div>
+      </div>
+
       <header class="app-header">
         <h1>To terninger</h1>
       </header>
@@ -108,6 +165,52 @@ window.addEventListener('hashchange', checkNewFlow)
   height: 100dvh;
   max-width: 600px;
   margin: 0 auto;
+}
+
+.reconnect-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 14px;
+  margin: 10px 12px 0;
+  background: var(--accent-bg, #e6f0ff);
+  border: 1px solid var(--accent);
+  border-radius: 10px;
+  color: var(--text);
+  font-size: 14px;
+}
+
+.reconnect-text {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.reconnect-actions {
+  display: flex;
+  gap: 6px;
+  flex: 0 0 auto;
+}
+
+.reconnect-yes,
+.reconnect-no {
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid var(--accent);
+}
+
+.reconnect-yes {
+  background: var(--accent);
+  color: #fff;
+}
+
+.reconnect-no {
+  background: transparent;
+  color: var(--accent);
 }
 
 .app-header {

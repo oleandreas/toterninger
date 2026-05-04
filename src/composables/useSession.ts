@@ -3,7 +3,8 @@ import { doc, setDoc, updateDoc, onSnapshot, type Unsubscribe } from 'firebase/f
 import { db } from '../firebase'
 import { getPlayerId } from './usePlayerId'
 import { generateSessionId } from '../router'
-import { useSettings } from './useSettings'
+import { useSettings, type TurnTimeout } from './useSettings'
+import { saveLastSession } from '../lastSession'
 
 export interface Player {
   id: string
@@ -29,6 +30,7 @@ export interface SessionDocument {
   rolls: MultiplayerRoll[]
   turnStartedAt: number
   heartbeats: Record<string, number>
+  turnTimeout: TurnTimeout
 }
 
 const HEARTBEAT_INTERVAL = 5000
@@ -83,6 +85,18 @@ export function useSession() {
     return awayPlayerIds.value.has(cp.id)
   })
 
+  // Who may press the "Neste" button in the UI:
+  //   - 'manual' mode: only the active player
+  //   - 'admin' mode:  only the host
+  //   - numeric (timer) mode: nobody (auto-advance handles it)
+  const canPassTurn = computed(() => {
+    const s = session.value
+    if (!s || s.status !== 'playing') return false
+    if (s.turnTimeout === 'manual') return isMyTurn.value
+    if (s.turnTimeout === 'admin') return isHost.value
+    return false
+  })
+
   // Turn timer: seconds remaining
   const turnSecondsLeft = ref<number | null>(null)
 
@@ -115,14 +129,19 @@ export function useSession() {
         turnSecondsLeft.value = null
         return
       }
-      const timeoutMs = settings.turnTimeout * 1000
+      // Only auto-advance for numeric timeouts; 'manual' / 'admin' are advanced via passTurn
+      if (typeof s.turnTimeout !== 'number') {
+        turnSecondsLeft.value = null
+        return
+      }
+      const timeoutMs = s.turnTimeout * 1000
       const elapsed = Date.now() - s.turnStartedAt
       const remaining = Math.max(0, Math.ceil((timeoutMs - elapsed) / 1000))
       turnSecondsLeft.value = remaining
 
       // Host auto-advances when timer runs out
       if (remaining <= 0 && isHost.value && currentSessionId) {
-        autoAdvanceTurn()
+        advanceTurn()
       }
     }, 1000)
   }
@@ -135,7 +154,7 @@ export function useSession() {
     turnSecondsLeft.value = null
   }
 
-  async function autoAdvanceTurn() {
+  async function advanceTurn() {
     if (!session.value || !currentSessionId) return
     const nextIndex = (session.value.currentPlayerIndex + 1) % session.value.players.length
     const docRef = doc(db, 'sessions', currentSessionId)
@@ -145,6 +164,11 @@ export function useSession() {
         turnStartedAt: Date.now(),
       })
     } catch {}
+  }
+
+  async function passTurn() {
+    if (!canPassTurn.value) return
+    await advanceTurn()
   }
 
   function listenToSession(sessionId: string) {
@@ -160,6 +184,8 @@ export function useSession() {
         session.value = snap.data() as SessionDocument
         // Ensure heartbeats field exists
         if (!session.value.heartbeats) session.value.heartbeats = {}
+        // Backfill turnTimeout for sessions created before this field existed
+        if (session.value.turnTimeout === undefined) session.value.turnTimeout = 30
 
         // Start/stop turn timer when game is playing
         if (session.value.status === 'playing') {
@@ -191,8 +217,10 @@ export function useSession() {
       rolls: [],
       turnStartedAt: 0,
       heartbeats: { [playerId]: Date.now() },
+      turnTimeout: settings.turnTimeout,
     }
     await setDoc(docRef, data)
+    saveLastSession(sessionId, hostName)
     listenToSession(sessionId)
     return sessionId
   }
@@ -213,8 +241,12 @@ export function useSession() {
 
     if (!session.value) throw new Error('Spillet finnes ikke')
 
-    // Already joined?
-    if (session.value.players.some(p => p.id === playerId)) return
+    // Already joined? Save under the canonical name from the session doc.
+    const existing = session.value.players.find(p => p.id === playerId)
+    if (existing) {
+      saveLastSession(sessionId, existing.name)
+      return
+    }
 
     const docRef = doc(db, 'sessions', sessionId)
     const updatedPlayers = [...session.value.players, { id: playerId, name: playerName }]
@@ -222,6 +254,7 @@ export function useSession() {
       players: updatedPlayers,
       [`heartbeats.${playerId}`]: Date.now(),
     })
+    saveLastSession(sessionId, playerName)
   }
 
   async function startGame(sessionId: string) {
@@ -320,11 +353,13 @@ export function useSession() {
     awayPlayerIds,
     currentPlayerAway,
     turnSecondsLeft,
+    canPassTurn,
     listenToSession,
     createSession,
     joinSession,
     startGame,
     submitRoll,
+    passTurn,
     reorderPlayers,
     removePlayer,
     resetStats,

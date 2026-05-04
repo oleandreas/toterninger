@@ -20,8 +20,8 @@ const myPlayerId = getPlayerId()
 
 const {
   session, loading, error, isHost, isMyTurn, currentPlayer, hasJoined,
-  awayPlayerIds, currentPlayerAway, turnSecondsLeft,
-  listenToSession, startGame, submitRoll,
+  awayPlayerIds, currentPlayerAway, turnSecondsLeft, canPassTurn,
+  listenToSession, startGame, submitRoll, passTurn,
   reorderPlayers, removePlayer, resetStats, restartGame,
 } = useSession()
 
@@ -156,6 +156,12 @@ const awayCount = computed(() => {
         :player-away="currentPlayerAway"
       />
 
+      <div v-if="canPassTurn" class="pass-turn">
+        <button class="pass-btn" @click="passTurn">
+          {{ session.turnTimeout === 'admin' && !isMyTurn ? `Neste spiller` : 'Gi turen videre' }}
+        </button>
+      </div>
+
       <main class="game-main" :class="{ 'game-main-top': activeTab !== 'dice' }">
         <DiceRoller v-if="activeTab === 'dice'" :disabled="disabled" />
         <Statistics v-else-if="activeTab === 'stats'" :can-reset="isHost" />
@@ -276,6 +282,26 @@ const awayCount = computed(() => {
 }
 
 .host-menu button:hover { background: var(--bg-hover); }
+
+.pass-turn {
+  display: flex;
+  justify-content: center;
+  padding: 8px 16px 0;
+}
+
+.pass-btn {
+  padding: 8px 18px;
+  border: 1px solid var(--accent);
+  border-radius: 8px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.pass-btn:hover { opacity: 0.85; }
 
 .game-main {
   flex: 1;
