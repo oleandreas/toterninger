@@ -7,7 +7,7 @@ import { useSettings } from '../composables/useSettings'
 import type { AnimationSpeed } from '../composables/useSettings'
 import { useStatistics, statisticsKey } from '../composables/useStatistics'
 import { useShake, requestShakePermission } from '../composables/useShake'
-import { playDiceSound } from '../composables/useSound'
+import { playDiceSound, playRobberSound } from '../composables/useSound'
 import { getPlayerId } from '../composables/usePlayerId'
 
 const props = withDefaults(defineProps<{
@@ -90,6 +90,9 @@ async function roll() {
   hasRolled.value = true
   rolling.value = false
   showResult.value = true
+  if (settings.sound && isCatan.value && sum.value === 7) {
+    playRobberSound()
+  }
   emit('rolled', [...dice.value])
 }
 
@@ -140,6 +143,9 @@ watch(
     hasRolled.value = true
     rolling.value = false
     showResult.value = true
+    if (settings.sound && isCatan.value && sum.value === 7) {
+      playRobberSound()
+    }
   }
 )
 
