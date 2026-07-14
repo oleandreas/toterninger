@@ -14,6 +14,10 @@ const props = withDefaults(defineProps<{
   disabled?: boolean
 }>(), { disabled: false })
 
+const emit = defineEmits<{
+  rolled: [dice: number[]]
+}>()
+
 const { settings } = useSettings()
 const injectedStats = inject(statisticsKey, undefined)
 const stats = injectedStats ?? useStatistics()
@@ -86,6 +90,7 @@ async function roll() {
   hasRolled.value = true
   rolling.value = false
   showResult.value = true
+  emit('rolled', [...dice.value])
 }
 
 useShake(roll)
