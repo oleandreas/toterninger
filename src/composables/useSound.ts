@@ -45,6 +45,44 @@ export function playDiceSound() {
   chime.stop(now + 0.8)
 }
 
+export function playRobberSound() {
+  const ctx = getAudioContext()
+  const now = ctx.currentTime
+
+  // Ominous descending "dun-dun" brass stabs — the robber is coming
+  const hits: Array<{ freq: number; offset: number }> = [
+    { freq: 164.81, offset: 0 },    // E3
+    { freq: 123.47, offset: 0.3 },  // B2
+  ]
+  for (const h of hits) {
+    const osc = ctx.createOscillator()
+    const gain = ctx.createGain()
+    osc.type = 'sawtooth'
+    osc.frequency.setValueAtTime(h.freq, now + h.offset)
+    osc.frequency.exponentialRampToValueAtTime(h.freq * 0.92, now + h.offset + 0.35)
+    gain.gain.setValueAtTime(0.0001, now + h.offset)
+    gain.gain.exponentialRampToValueAtTime(0.16, now + h.offset + 0.03)
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + h.offset + 0.4)
+    osc.connect(gain)
+    gain.connect(ctx.destination)
+    osc.start(now + h.offset)
+    osc.stop(now + h.offset + 0.45)
+  }
+
+  // Low rumble underneath for tension
+  const rumble = ctx.createOscillator()
+  const rumbleGain = ctx.createGain()
+  rumble.type = 'triangle'
+  rumble.frequency.setValueAtTime(55, now)
+  rumbleGain.gain.setValueAtTime(0.0001, now)
+  rumbleGain.gain.exponentialRampToValueAtTime(0.12, now + 0.05)
+  rumbleGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.8)
+  rumble.connect(rumbleGain)
+  rumbleGain.connect(ctx.destination)
+  rumble.start(now)
+  rumble.stop(now + 0.85)
+}
+
 export function playTurnSound() {
   const ctx = getAudioContext()
   const now = ctx.currentTime
