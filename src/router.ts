@@ -2,7 +2,8 @@ import { ref, readonly } from 'vue'
 
 export interface RouteHome { name: 'home' }
 export interface RouteSession { name: 'session'; sessionId: string }
-export type Route = RouteHome | RouteSession
+export interface RouteLocal { name: 'local' }
+export type Route = RouteHome | RouteSession | RouteLocal
 
 const route = ref<Route>(parseHash())
 
@@ -11,6 +12,9 @@ function parseHash(): Route {
   const match = hash.match(/^#\/session\/(\d{3}-\d{3}-\d{3})$/)
   if (match) {
     return { name: 'session', sessionId: match[1] }
+  }
+  if (hash === '#/lokal') {
+    return { name: 'local' }
   }
   return { name: 'home' }
 }
@@ -23,6 +27,8 @@ export function useRouter() {
   function navigate(r: Route) {
     if (r.name === 'home') {
       window.location.hash = ''
+    } else if (r.name === 'local') {
+      window.location.hash = '/lokal'
     } else {
       window.location.hash = `/session/${r.sessionId}`
     }

@@ -11,6 +11,7 @@ import Statistics from './components/Statistics.vue'
 import SettingsPanel from './components/SettingsPanel.vue'
 import AboutPage from './components/AboutPage.vue'
 import MultiplayerGame from './components/multiplayer/MultiplayerGame.vue'
+import LocalGame from './components/LocalGame.vue'
 
 const { route, navigate } = useRouter()
 
@@ -101,6 +102,7 @@ onMounted(() => {
       </main>
 
       <div class="multiplayer-cta" v-if="activeTab === 'dice'">
+        <button class="mp-btn" @click="navigate({ name: 'local' })">Spill på tur</button>
         <button class="mp-btn" @click="openMultiplayer">Spill med flere</button>
       </div>
 
@@ -154,6 +156,11 @@ onMounted(() => {
     <!-- MULTIPLAYER SESSION -->
     <template v-else-if="route.name === 'session'">
       <MultiplayerGame :session-id="route.sessionId" />
+    </template>
+
+    <!-- LOCAL PASS-AND-PLAY -->
+    <template v-else-if="route.name === 'local'">
+      <LocalGame />
     </template>
   </div>
 </template>
@@ -247,8 +254,10 @@ onMounted(() => {
 }
 
 .multiplayer-cta {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
   padding: 0 20px 8px;
-  text-align: center;
 }
 
 .mp-btn {
