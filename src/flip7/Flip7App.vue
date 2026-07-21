@@ -62,6 +62,9 @@ function onManualInput(id: string, e: Event) {
 // --- Menu ---
 const menuOpen = ref(false)
 
+// --- Rules ---
+const showRules = ref(false)
+
 function confirmNewGame() {
   if (confirm('Starte ny kamp? Spillerne beholdes, men alle runder nullstilles.')) {
     for (const key of Object.keys(draft)) delete draft[key]
@@ -92,8 +95,10 @@ const rankedPlayers = computed(() =>
     <header class="head">
       <a class="home-link" href="/" aria-label="Til toterninger.no">&#8592;</a>
       <h1>Flip 7</h1>
-      <button v-if="state.started" class="menu-btn" @click="menuOpen = !menuOpen" aria-label="Meny">&#8942;</button>
-      <div v-else class="menu-spacer"></div>
+      <div class="head-actions">
+        <button class="icon-btn" @click="showRules = true" aria-label="Regler">?</button>
+        <button v-if="state.started" class="icon-btn" @click="menuOpen = !menuOpen" aria-label="Meny">&#8942;</button>
+      </div>
 
       <div v-if="menuOpen" class="menu" @click.self="menuOpen = false">
         <div class="menu-card">
@@ -107,6 +112,8 @@ const rankedPlayers = computed(() =>
     <!-- ============ SETUP ============ -->
     <main v-if="!state.started" class="setup">
       <p class="tagline">Poengark for kortspillet Flip 7. Legg til spillere og hold styr på poengene – først til {{ state.target }} vinner.</p>
+
+      <button class="rules-link" @click="showRules = true">📖 Slik spiller du Flip 7</button>
 
       <label class="target-row">
         <span>Poengmål</span>
@@ -231,6 +238,47 @@ const rankedPlayers = computed(() =>
       @confirm="onCalcConfirm"
       @cancel="calcFor = null"
     />
+
+    <!-- ============ RULES ============ -->
+    <div v-if="showRules" class="rules-overlay" @click.self="showRules = false">
+      <div class="rules-card">
+        <header class="rules-head">
+          <h2>Slik spiller du Flip 7</h2>
+          <button class="rules-close" @click="showRules = false" aria-label="Lukk">&times;</button>
+        </header>
+
+        <p class="rules-intro">
+          Flip 7 er et «press-your-luck»-kortspill: trekk kort for å samle poeng – men blir du grådig, sprekker du.
+          Først til <strong>{{ state.target }}</strong> poeng vinner. Dette arket holder styr på poengene mens dere spiller med kortene.
+        </p>
+
+        <h3>På tur</h3>
+        <ul>
+          <li><strong>Flipp</strong> – trekk et kort til, eller <strong>stopp</strong> for å sikre poengene du har samlet i runden.</li>
+          <li>Runden varer til alle har stoppet eller sprukket – eller til noen får «Flip 7».</li>
+        </ul>
+
+        <h3>Kortene</h3>
+        <ul>
+          <li><strong>Tallkort 0–12</strong> – summen din for runden. Trekker du et tall du <em>allerede</em> har, <strong>sprekker</strong> du og får 0 poeng den runden.</li>
+          <li><strong>7 ulike tallkort = «Flip 7»</strong> – runden avsluttes umiddelbart og du får <strong>+15 bonuspoeng</strong>.</li>
+          <li><strong>Modifikatorer</strong> – <strong>+2, +4, +6, +8, +10</strong> legges til summen, og <strong>×2</strong> dobler summen av tallkortene.</li>
+          <li><strong>Handlingskort</strong> – <em>Frys</em> (en spiller må stoppe), <em>Trekk tre</em> (må trekke tre kort på rad), <em>Andre sjanse</em> (redder deg fra én sprekk).</li>
+        </ul>
+
+        <h3>Poeng per runde</h3>
+        <ul>
+          <li>Summen av tallkortene dine, ganget med ×2 om du har det kortet, pluss modifikatorer, pluss 15 ved Flip 7.</li>
+          <li>Sprakk du? Da får du <strong>0 poeng</strong> for runden.</li>
+        </ul>
+
+        <p class="rules-tip">
+          💡 Bruk «🃏 Kort»-knappen ved hver spiller for å regne ut rundescoren automatisk, eller skriv tallet rett inn.
+        </p>
+
+        <button class="rules-done" @click="showRules = false">Skjønner!</button>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -263,19 +311,33 @@ const rankedPlayers = computed(() =>
   font-size: 22px;
   color: var(--accent);
   text-decoration: none;
-  width: 32px;
+  width: 64px;
 }
 
-.menu-btn {
-  width: 32px;
-  border: none;
-  background: none;
-  font-size: 22px;
+.head-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  justify-content: flex-end;
+  width: 64px;
+}
+
+.icon-btn {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: var(--bg-subtle);
+  font-size: 16px;
+  font-weight: 700;
   color: var(--text-secondary);
   cursor: pointer;
 }
 
-.menu-spacer { width: 32px; }
+.icon-btn:hover { background: var(--bg-hover); color: var(--text); }
 
 .menu {
   position: fixed;
@@ -577,4 +639,120 @@ tfoot td {
 }
 
 .row-del:hover { color: var(--danger); }
+
+/* ---------- Rules ---------- */
+.rules-link {
+  align-self: flex-start;
+  padding: 8px 0;
+  border: none;
+  background: none;
+  color: var(--accent);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.rules-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 60;
+}
+
+.rules-card {
+  width: 100%;
+  max-width: 600px;
+  max-height: 92dvh;
+  overflow-y: auto;
+  background: var(--bg-card);
+  border-radius: 16px 16px 0 0;
+  padding: 16px 18px calc(20px + env(safe-area-inset-bottom, 0));
+  box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.3);
+}
+
+@media (min-width: 620px) {
+  .rules-overlay { align-items: center; }
+  .rules-card { border-radius: 16px; }
+}
+
+.rules-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  background: var(--bg-card);
+  padding-bottom: 6px;
+  margin-bottom: 4px;
+}
+
+.rules-head h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.rules-close {
+  border: none;
+  background: none;
+  font-size: 28px;
+  line-height: 1;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0 6px;
+}
+
+.rules-card h3 {
+  margin: 16px 0 6px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.rules-intro,
+.rules-card li {
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--text);
+}
+
+.rules-intro { margin: 4px 0 8px; color: var(--text-secondary); }
+
+.rules-card ul {
+  margin: 0;
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.rules-tip {
+  margin: 16px 0 4px;
+  padding: 10px 12px;
+  background: var(--accent-bg);
+  border: 1px solid var(--accent);
+  border-radius: 10px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text);
+}
+
+.rules-done {
+  width: 100%;
+  margin-top: 16px;
+  padding: 13px;
+  border: none;
+  border-radius: 10px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
 </style>
