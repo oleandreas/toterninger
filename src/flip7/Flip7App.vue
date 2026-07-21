@@ -508,16 +508,16 @@ const rankedPlayers = computed(() =>
 .board { display: flex; flex-direction: column; gap: 8px; }
 
 .player-card {
-  padding: 11px 13px;
+  padding: 12px 14px;
   background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  box-shadow: inset 0 0 0 3px var(--bg-card), inset 0 0 0 4px var(--border-light);
 }
 
 .player-card.leader {
   border-color: var(--warning);
-  box-shadow: 0 2px 10px rgba(244, 180, 26, 0.28);
+  box-shadow: inset 0 0 0 3px var(--bg-card), inset 0 0 0 4px var(--warning), 0 2px 12px rgba(201, 162, 39, 0.3);
 }
 
 .pc-top {

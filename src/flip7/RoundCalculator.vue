@@ -5,6 +5,16 @@ import { NUMBER_CARDS, BONUS_CARDS, FLIP7_BONUS, scoreRound } from './useFlip7'
 const props = defineProps<{ playerName: string; initial?: number }>()
 const emit = defineEmits<{ (e: 'confirm', score: number): void; (e: 'cancel'): void }>()
 
+// Per-number accent, echoing the card game's colour-coded number cards
+// (6 magenta, 9 orange, 11 periwinkle, …).
+const NUM_COLORS = [
+  '#3a9188', '#d64545', '#e8792b', '#4a9d4a', '#3d7fb5', '#8e5aa8', '#a03c6e',
+  '#c9a227', '#2f8f86', '#e8792b', '#3d7fb5', '#5566b5', '#d64545',
+]
+function numColor(n: number): string {
+  return NUM_COLORS[n] ?? '#3d7fb5'
+}
+
 const numbers = ref<Set<number>>(new Set())
 const bonuses = ref<Set<number>>(new Set())
 const x2 = ref(false)
@@ -78,6 +88,7 @@ const score = computed(() =>
             :key="n"
             class="card num"
             :class="{ on: numbers.has(n) }"
+            :style="{ '--c': numColor(n) }"
             :disabled="bust"
             @click="toggleNumber(n)"
           >{{ n }}</button>
@@ -212,14 +223,14 @@ const score = computed(() =>
 
 .card {
   aspect-ratio: 3 / 4;
-  border: 2px solid var(--border);
+  border: 1.5px solid var(--border);
   background: var(--bg-card);
-  color: var(--text);
-  border-radius: 11px;
-  font-size: 17px;
-  font-weight: 800;
+  color: var(--c, var(--text));
+  border-radius: 9px;
+  font-size: 18px;
+  font-weight: 900;
   cursor: pointer;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+  box-shadow: inset 0 0 0 2px var(--bg-card), inset 0 0 0 3px var(--border-light);
   transition: transform 0.08s, background 0.15s, border-color 0.15s, color 0.15s, box-shadow 0.15s;
 }
 
@@ -227,28 +238,31 @@ const score = computed(() =>
 .card:disabled { opacity: 0.35; cursor: not-allowed; }
 
 .card.num.on {
-  background: var(--flip7-teal, var(--accent));
-  border-color: var(--flip7-teal, var(--accent));
+  background: var(--c, var(--accent));
+  border-color: var(--c, var(--accent));
   color: #fff;
-  box-shadow: 0 4px 12px rgba(18, 163, 148, 0.4);
+  box-shadow: inset 0 0 0 2px var(--c), inset 0 0 0 3px rgba(255, 255, 255, 0.55);
   transform: translateY(-2px);
 }
 
 .card.bonus.on {
-  background: var(--flip7-coral, var(--danger));
-  border-color: var(--flip7-coral, var(--danger));
+  background: var(--danger);
+  border-color: var(--danger);
   color: #fff;
-  box-shadow: 0 4px 12px rgba(239, 91, 59, 0.4);
+  box-shadow: inset 0 0 0 2px var(--danger), inset 0 0 0 3px rgba(255, 255, 255, 0.55);
   transform: translateY(-2px);
 }
 
 .card.mult.on {
-  background: var(--flip7-gold, var(--warning));
-  border-color: var(--flip7-gold, var(--warning));
-  color: #26403c;
-  box-shadow: 0 4px 12px rgba(244, 180, 26, 0.45);
+  background: var(--warning);
+  border-color: var(--warning);
+  color: #fff;
+  box-shadow: inset 0 0 0 2px var(--warning), inset 0 0 0 3px rgba(255, 255, 255, 0.55);
   transform: translateY(-2px);
 }
+
+.card.bonus { color: var(--danger); }
+.card.mult { color: var(--warning); }
 
 .bust-btn {
   width: 100%;
