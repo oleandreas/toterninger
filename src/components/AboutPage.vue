@@ -42,6 +42,15 @@
     </section>
 
     <section>
+      <h3>Flip 7-poengark</h3>
+      <p>
+        Spiller du kortspillet <strong>Flip 7</strong>? Bruk det innebygde poengarket for &aring;
+        holde styr p&aring; poeng, runder og hvem som f&oslash;rst n&aring;r m&aring;let.
+        <a class="flip7-link" href="/flip7">&Aring;pne Flip 7-poengark &rarr;</a>
+      </p>
+    </section>
+
+    <section>
       <h3>Utseende</h3>
       <p>Velg mellom lyst, m&oslash;rkt og neon-tema (80-talls retro) under Innstillinger.</p>
     </section>
@@ -115,5 +124,13 @@ li {
 .about-footer p {
   font-size: 13px;
   color: var(--text-muted);
+}
+
+.flip7-link {
+  display: inline-block;
+  margin-top: 4px;
+  color: var(--accent);
+  font-weight: 600;
+  text-decoration: none;
 }
 </style>

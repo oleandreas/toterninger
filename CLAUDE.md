@@ -2,6 +2,10 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Scope
+
+All game-related work (dice games, score sheets, board-game tools, and similar) belongs in this repository unless specified otherwise.
+
 ## Project Overview
 
 Toterninger is an interactive two-dice roller web app, primarily designed for Settlers of Catan. It supports solo play with persistent stats and a Firestore-backed multiplayer mode (host + joiners over a shared session code). Features include animated CSS dice, shake-to-roll on mobile, procedural Web Audio sound, contextual roll commentary, and a Catan mode that highlights when 7 (the robber) is rolled.
