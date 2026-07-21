@@ -91,10 +91,12 @@ const rankedPlayers = computed(() =>
 </script>
 
 <template>
-  <div class="page">
+  <div class="page flip7-page">
     <header class="head">
       <a class="home-link" href="/" aria-label="Til toterninger.no">&#8592;</a>
-      <h1>Flip 7</h1>
+      <div class="flip7-logo" aria-label="Flip 7">
+        <span class="fl-flip">FLIP</span><span class="fl-7">7</span>
+      </div>
       <div class="head-actions">
         <button class="icon-btn" @click="showRules = true" aria-label="Regler">?</button>
         <button v-if="state.started" class="icon-btn" @click="menuOpen = !menuOpen" aria-label="Meny">&#8942;</button>
@@ -506,13 +508,17 @@ const rankedPlayers = computed(() =>
 .board { display: flex; flex-direction: column; gap: 8px; }
 
 .player-card {
-  padding: 10px 12px;
+  padding: 11px 13px;
   background: var(--bg-card);
   border: 1px solid var(--border);
-  border-radius: 10px;
+  border-radius: 14px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
-.player-card.leader { border-color: var(--warning); }
+.player-card.leader {
+  border-color: var(--warning);
+  box-shadow: 0 2px 10px rgba(244, 180, 26, 0.28);
+}
 
 .pc-top {
   display: flex;

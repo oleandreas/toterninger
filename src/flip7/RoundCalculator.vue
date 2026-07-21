@@ -212,35 +212,42 @@ const score = computed(() =>
 
 .card {
   aspect-ratio: 3 / 4;
-  border: 1.5px solid var(--border);
-  background: var(--bg-subtle);
+  border: 2px solid var(--border);
+  background: var(--bg-card);
   color: var(--text);
-  border-radius: 8px;
-  font-size: 16px;
-  font-weight: 700;
+  border-radius: 11px;
+  font-size: 17px;
+  font-weight: 800;
   cursor: pointer;
-  transition: transform 0.08s, background 0.15s, border-color 0.15s, color 0.15s;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+  transition: transform 0.08s, background 0.15s, border-color 0.15s, color 0.15s, box-shadow 0.15s;
 }
 
 .card:active { transform: scale(0.94); }
 .card:disabled { opacity: 0.35; cursor: not-allowed; }
 
 .card.num.on {
-  background: var(--accent);
-  border-color: var(--accent);
+  background: var(--flip7-teal, var(--accent));
+  border-color: var(--flip7-teal, var(--accent));
   color: #fff;
+  box-shadow: 0 4px 12px rgba(18, 163, 148, 0.4);
+  transform: translateY(-2px);
 }
 
 .card.bonus.on {
-  background: var(--success);
-  border-color: var(--success);
+  background: var(--flip7-coral, var(--danger));
+  border-color: var(--flip7-coral, var(--danger));
   color: #fff;
+  box-shadow: 0 4px 12px rgba(239, 91, 59, 0.4);
+  transform: translateY(-2px);
 }
 
 .card.mult.on {
-  background: var(--warning);
-  border-color: var(--warning);
-  color: #1a1a1a;
+  background: var(--flip7-gold, var(--warning));
+  border-color: var(--flip7-gold, var(--warning));
+  color: #26403c;
+  box-shadow: 0 4px 12px rgba(244, 180, 26, 0.45);
+  transform: translateY(-2px);
 }
 
 .bust-btn {

@@ -1,5 +1,6 @@
 import { createApp } from 'vue'
 import '../style.css'
+import './flip7-theme.css'
 import { useSettings } from '../composables/useSettings'
 import Flip7App from './Flip7App.vue'
 
