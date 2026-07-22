@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, reactive, computed } from 'vue'
+import { ref, reactive, computed, nextTick } from 'vue'
 import { useFlip7 } from './useFlip7'
 import RoundCalculator from './RoundCalculator.vue'
 
@@ -37,11 +37,16 @@ const canSaveRound = computed(() =>
   state.players.some(p => draftValue(p.id) !== null)
 )
 
+const boardRef = ref<HTMLElement | null>(null)
+
 function saveRound() {
   const scores: Record<string, number> = {}
   for (const p of state.players) scores[p.id] = draftValue(p.id) ?? 0
   commitRound(scores)
   for (const key of Object.keys(draft)) delete draft[key]
+  nextTick(() => {
+    boardRef.value?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  })
 }
 
 // --- Calculator modal ---
@@ -161,7 +166,7 @@ const rankedPlayers = computed(() =>
       </div>
 
       <!-- Scoreboard -->
-      <section class="board">
+      <section ref="boardRef" class="board">
         <div
           v-for="(p, i) in rankedPlayers"
           :key="p.id"
@@ -169,9 +174,12 @@ const rankedPlayers = computed(() =>
           :class="{ leader: p.id === leaderId && (totals[p.id] ?? 0) > 0 }"
         >
           <div class="pc-top">
-            <span class="pc-rank">{{ i + 1 }}</span>
+            <span class="pc-rank" :class="`rank-${i + 1}`">
+              <template v-if="i < 3">{{ ['🥇', '🥈', '🥉'][i] }}</template>
+              <template v-else>{{ i + 1 }}</template>
+            </span>
             <span class="pc-name">{{ p.name }}</span>
-            <span class="pc-total">{{ totals[p.id] ?? 0 }}</span>
+            <span class="pc-total"><span class="pc-total-num">{{ totals[p.id] ?? 0 }}</span><span class="pc-total-max">/{{ state.target }}</span></span>
           </div>
           <div class="pc-bar"><div class="pc-bar-fill" :style="{ width: progressPct(p.id) + '%' }"></div></div>
         </div>
@@ -528,23 +536,43 @@ const rankedPlayers = computed(() =>
 }
 
 .pc-rank {
-  width: 22px;
-  height: 22px;
+  width: 28px;
+  height: 28px;
   flex: 0 0 auto;
   display: flex;
   align-items: center;
   justify-content: center;
   background: var(--bg-subtle);
   color: var(--text-secondary);
+  border: 1.5px solid var(--border);
   border-radius: 50%;
-  font-size: 12px;
-  font-weight: 700;
+  font-size: 13px;
+  font-weight: 800;
 }
 
-.player-card.leader .pc-rank { background: var(--warning); color: #1a1a1a; }
+.pc-rank.rank-1,
+.pc-rank.rank-2,
+.pc-rank.rank-3 {
+  background: transparent;
+  border: none;
+  font-size: 22px;
+  width: 28px;
+}
 
-.pc-name { flex: 1; font-size: 16px; font-weight: 600; color: var(--text); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.pc-total { font-size: 20px; font-weight: 800; color: var(--text); }
+.pc-name { flex: 1; font-size: 16px; font-weight: 700; color: var(--text); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.pc-total {
+  flex: 0 0 auto;
+  margin-left: auto;
+  padding-left: 8px;
+  display: flex;
+  align-items: baseline;
+  gap: 1px;
+  white-space: nowrap;
+}
+
+.pc-total-num { font-size: 22px; font-weight: 900; color: var(--text); }
+.pc-total-max { font-size: 12px; font-weight: 700; color: var(--text-muted); }
 
 .pc-bar { height: 6px; background: var(--bar-track); border-radius: 3px; overflow: hidden; }
 .pc-bar-fill { height: 100%; background: var(--bar-fill); border-radius: 3px; transition: width 0.3s; }
