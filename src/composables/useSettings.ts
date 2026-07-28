@@ -12,6 +12,7 @@ export interface Settings {
   gameMode: GameMode
   diceCount: number
   shakeToRoll: boolean
+  keepAwake: boolean // hold the screen on while the app is open (Screen Wake Lock API)
   turnTimeout: TurnTimeout // seconds (number) | 'manual' (active player advances) | 'admin' (host advances)
   turnSound: boolean // play a chime when it becomes your turn (multiplayer)
   theme: Theme
@@ -27,6 +28,7 @@ function defaultSettings(): Settings {
     gameMode: 'catan' as GameMode,
     diceCount: 2,
     shakeToRoll: false,
+    keepAwake: false,
     turnTimeout: 30,
     turnSound: false,
     theme: 'light' as Theme,

@@ -3,8 +3,10 @@ import { ref } from 'vue'
 import { useSettings } from '../composables/useSettings'
 import type { GameMode } from '../composables/useSettings'
 import { requestShakePermission } from '../composables/useShake'
+import { useWakeLock } from '../composables/useWakeLock'
 
 const { settings } = useSettings()
+const { wakeLockSupported } = useWakeLock()
 const shakePermissionDenied = ref(false)
 
 async function toggleShake() {
@@ -177,6 +179,18 @@ function setGameMode(mode: GameMode) {
     <p class="setting-hint" v-else-if="settings.shakeToRoll">
       Rist telefonen for å kaste terningene.
     </p>
+
+    <label class="setting-row" :class="{ disabled: !wakeLockSupported }">
+      <span>Hold skjermen våken</span>
+      <input type="checkbox" v-model="settings.keepAwake" :disabled="!wakeLockSupported" />
+    </label>
+
+    <p class="setting-hint" v-if="!wakeLockSupported">
+      Nettleseren din støtter ikke å holde skjermen våken.
+    </p>
+    <p class="setting-hint" v-else-if="settings.keepAwake">
+      Skjermen slukker ikke av seg selv så lenge appen er åpen. Bruker litt mer batteri.
+    </p>
   </div>
 </template>
 
@@ -313,6 +327,11 @@ function setGameMode(mode: GameMode) {
   cursor: pointer;
   font-size: 15px;
   color: var(--text);
+}
+
+.setting-row.disabled {
+  opacity: 0.5;
+  cursor: default;
 }
 
 .setting-row input[type="checkbox"] {

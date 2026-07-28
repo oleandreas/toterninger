@@ -71,6 +71,7 @@ Security rules live in `firestore.rules` (deploy with `firebase deploy --only fi
 - `useMultiplayerStatistics` — adapts a Firestore session into a `StatisticsAPI`.
 - `useShake` — DeviceMotion shake detection with iOS 13+ permission flow; must be cycled on page load (see commit `36624b4`) for browser to register the listener reliably.
 - `useSound` — Web Audio API procedural dice sounds; no audio files.
+- `useWakeLock` — Screen Wake Lock API behind `settings.keepAwake`. Side effects run at **module scope** (not in a component) so the lock survives tab switches; activated by a bare `import` in `main.ts`. The browser drops the lock whenever the tab is hidden, so it re-acquires on `visibilitychange`.
 - `useSession` / `usePlayerId` — multiplayer (see above).
 
 ### Game modes
