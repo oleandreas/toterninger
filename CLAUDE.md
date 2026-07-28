@@ -62,7 +62,7 @@ When changing the stats interface, update both implementations and the `Statisti
 - Player identity is a UUID stored in localStorage by `usePlayerId.ts` — same browser = same player across sessions.
 - **Reconnect**: `src/lastSession.ts` persists `{ sessionId, name }` to localStorage on `createSession`/`joinSession`. `App.vue` checks it on mount of the home view: one-shot `getDoc` against the saved session — if it exists, status is `lobby`/`playing`, AND the local `playerId` is still in `players[]`, a banner offers to rejoin. Otherwise the saved session is silently cleared. The "Tilbake" button in `MultiplayerGame` does NOT clear the saved session — by design it's the user's path back to the same game via the reconnect banner.
 
-There are currently no Firestore security rules in this repo; the API key is committed (public web-app key, gated by Firestore rules in the Firebase console).
+Security rules live in `firestore.rules` (deploy with `firebase deploy --only firestore:rules`; project id in `.firebaserc`). They allow open read on `sessions/{id}`, shape-validated create, loosely validated update, and no delete — everything outside `sessions` is denied. The create rule pins the exact allowed key set, so **adding a field to `SessionDocument` requires adding it to the `hasOnly([...])` list** or creation starts failing. The API key is committed (public web-app key, gated by these rules).
 
 ### Composables
 
