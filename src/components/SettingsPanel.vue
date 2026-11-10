@@ -191,6 +191,14 @@ function setGameMode(mode: GameMode) {
     <p class="setting-hint" v-else-if="settings.keepAwake">
       Skjermen slukker ikke av seg selv så lenge appen er åpen. Bruker litt mer batteri.
     </p>
+
+    <label v-if="wakeLockSupported && !settings.keepAwake" class="setting-row">
+      <span>Hold skjermen våken under spill</span>
+      <input type="checkbox" v-model="settings.keepAwakeInGame" />
+    </label>
+    <p class="setting-hint" v-if="wakeLockSupported && !settings.keepAwake && settings.keepAwakeInGame">
+      Gjelder når du spiller med flere, på tur eller fører Flip 7-poeng.
+    </p>
   </div>
 </template>
 

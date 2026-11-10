@@ -13,6 +13,7 @@ export interface Settings {
   diceCount: number
   shakeToRoll: boolean
   keepAwake: boolean // hold the screen on while the app is open (Screen Wake Lock API)
+  keepAwakeInGame: boolean // hold the screen on while a game view (multiplayer, local, Flip 7) is open
   turnTimeout: TurnTimeout // seconds (number) | 'manual' (active player advances) | 'admin' (host advances)
   turnSound: boolean // play a chime when it becomes your turn (multiplayer)
   theme: Theme
@@ -29,6 +30,7 @@ function defaultSettings(): Settings {
     diceCount: 2,
     shakeToRoll: false,
     keepAwake: false,
+    keepAwakeInGame: true,
     turnTimeout: 30,
     turnSound: false,
     theme: 'light' as Theme,

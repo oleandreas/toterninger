@@ -15,8 +15,18 @@ Toterninger is an interactive two-dice roller web app, primarily designed for Se
 - `npm run dev` — Start dev server (Vite)
 - `npm run build` — Type-check with `vue-tsc -b` then build for production
 - `npm run preview` — Preview the production build locally
+- `npm run dev:emulator` — Dev server against a local Firestore emulator (UI on :4000)
+- `npm run demo` — Multi-device demo: emulator + HTTPS dev server on the LAN (self-signed cert; phones must accept the warning). The lobby QR code uses the LAN IP even if the host opened `localhost`; override with `DEMO_HOST`.
+- `npm test` — Vitest unit tests (`tests/unit`, jsdom)
+- `npm run test:emulator` — Vitest multiplayer tests against the emulator (`tests/emulator`); each simulated device is a `useSession({ playerId })` instance. Also exercises `firestore.rules`.
+- `npm run test:e2e` — Playwright, one browser context per device (`tests/e2e`); starts emulator + Vite on :5180 itself
+- `npm run test:all` — all of the above
 
-There are no tests or linters configured.
+The emulator needs Java 21+ on PATH. No linters are configured.
+
+### Emulator wiring
+
+`VITE_FIRESTORE_EMULATOR` (set by `.env.emulator` / `.env.demo` and `vitest.config.ts`) switches `src/firebase.ts` to the `demo-toterninger` project so the prod DB is never touched. Value `proxy` routes Firestore through the Vite dev server (proxy rules in `vite.config.ts`) so phones and HTTPS pages reach the emulator same-origin; `host:port` connects directly (Node tests). HTTPS matters on phones: Wake Lock, DeviceMotion and `crypto.randomUUID` all require a secure context.
 
 ## Architecture
 
@@ -71,7 +81,7 @@ Security rules live in `firestore.rules` (deploy with `firebase deploy --only fi
 - `useMultiplayerStatistics` — adapts a Firestore session into a `StatisticsAPI`.
 - `useShake` — DeviceMotion shake detection with iOS 13+ permission flow; must be cycled on page load (see commit `36624b4`) for browser to register the listener reliably.
 - `useSound` — Web Audio API procedural dice sounds; no audio files.
-- `useWakeLock` — Screen Wake Lock API behind `settings.keepAwake`. Side effects run at **module scope** (not in a component) so the lock survives tab switches; activated by a bare `import` in `main.ts`. The browser drops the lock whenever the tab is hidden, so it re-acquires on `visibilitychange`.
+- `useWakeLock` — Screen Wake Lock API. Wanted when `settings.keepAwake` (always) or `settings.keepAwakeInGame` (default on) while a game view is mounted — `MultiplayerGame`, `LocalGame` and `Flip7App` call `useGameWakeLock()`. `WakeLockToggle.vue` is the header quick-toggle. Side effects run at **module scope** (not in a component) so the lock survives tab switches; activated by a bare `import` in `main.ts`. The browser drops the lock whenever the tab is hidden, so it re-acquires on `visibilitychange`.
 - `useSession` / `usePlayerId` — multiplayer (see above).
 
 ### Game modes

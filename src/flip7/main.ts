@@ -2,6 +2,7 @@ import { createApp } from 'vue'
 import '../style.css'
 import './flip7-theme.css'
 import { useSettings } from '../composables/useSettings'
+import '../composables/useWakeLock' // side-effect: applies the keep-awake settings
 import Flip7App from './Flip7App.vue'
 
 // Reuse the shared theme (light / dark / neon) chosen on the main app.

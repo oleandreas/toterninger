@@ -6,7 +6,13 @@
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc -b && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "dev:emulator": "firebase emulators:exec --only firestore --project demo-toterninger --ui \"vite --mode emulator\"",
+    "demo": "firebase emulators:exec --only firestore --project demo-toterninger --ui \"vite --mode demo\"",
+    "test": "vitest run --project unit",
+    "test:emulator": "firebase emulators:exec --only firestore --project demo-toterninger \"vitest run --project emulator\"",
+    "test:e2e": "playwright test",
+    "test:all": "npm run test && npm run test:emulator && npm run test:e2e"
   },
   "dependencies": {
     "@types/qrcode": "^1.5.6",
@@ -15,11 +21,16 @@
     "vue": "^3.5.32"
   },
   "devDependencies": {
+    "@playwright/test": "^1.65.0",
     "@types/node": "^24.12.2",
+    "@vitejs/plugin-basic-ssl": "^2.3.0",
     "@vitejs/plugin-vue": "^6.0.5",
     "@vue/tsconfig": "^0.9.1",
+    "firebase-tools": "^15.35.0",
+    "jsdom": "^31.0.0",
     "typescript": "~6.0.2",
     "vite": "^8.0.4",
+    "vitest": "^5.1.0",
     "vue-tsc": "^3.2.6"
   }
 }

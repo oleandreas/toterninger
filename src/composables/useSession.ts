@@ -36,7 +36,7 @@ export interface SessionDocument {
 const HEARTBEAT_INTERVAL = 5000
 const AWAY_THRESHOLD = 15000
 
-export function useSession() {
+export function useSession(options: { playerId?: string } = {}) {
   const { settings } = useSettings()
   const session: Ref<SessionDocument | null> = ref(null)
   const loading = ref(false)
@@ -46,7 +46,7 @@ export function useSession() {
   let turnTimer: ReturnType<typeof setInterval> | null = null
   let currentSessionId = ''
 
-  const playerId = getPlayerId()
+  const playerId = options.playerId ?? getPlayerId()
 
   const isHost = computed(() => session.value?.hostId === playerId)
   const isMyTurn = computed(() => {

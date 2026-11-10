@@ -2,8 +2,12 @@
 import { ref, computed } from 'vue'
 import { useRouter } from '../router'
 import DiceRoller from './DiceRoller.vue'
+import WakeLockToggle from './WakeLockToggle.vue'
+import { useGameWakeLock } from '../composables/useWakeLock'
 
 const { navigate } = useRouter()
+
+useGameWakeLock()
 
 type Phase = 'setup' | 'playing'
 const phase = ref<Phase>('setup')
@@ -101,6 +105,7 @@ function leave() {
       <header class="lg-header playing">
         <button class="back-btn" aria-label="Avslutt" @click="leave">&#8592;</button>
         <h1>To terninger</h1>
+        <WakeLockToggle />
         <button class="edit-btn" aria-label="Endre deltakere" @click="backToSetup">Deltakere</button>
       </header>
 

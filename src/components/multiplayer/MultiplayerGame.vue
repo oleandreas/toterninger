@@ -13,6 +13,8 @@ import TurnIndicator from './TurnIndicator.vue'
 import PlayerList from './PlayerList.vue'
 import DiceRoller from '../DiceRoller.vue'
 import Statistics from '../Statistics.vue'
+import WakeLockToggle from '../WakeLockToggle.vue'
+import { useGameWakeLock } from '../../composables/useWakeLock'
 
 const props = defineProps<{ sessionId: string }>()
 
@@ -28,6 +30,8 @@ const {
 } = useSession()
 
 const { navigate } = useRouter()
+
+useGameWakeLock()
 
 if (!isNewSession) {
   listenToSession(props.sessionId)
@@ -163,6 +167,7 @@ const awayCount = computed(() => {
             <line x1="16" y1="9" x2="22" y2="15" />
           </svg>
         </button>
+        <WakeLockToggle />
         <button v-if="isHost" class="menu-btn" @click="showHostMenu = !showHostMenu">&#8942;</button>
       </header>
 

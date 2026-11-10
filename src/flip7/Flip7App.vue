@@ -2,6 +2,10 @@
 import { ref, reactive, computed, nextTick } from 'vue'
 import { useFlip7 } from './useFlip7'
 import RoundCalculator from './RoundCalculator.vue'
+import WakeLockToggle from '../components/WakeLockToggle.vue'
+import { useGameWakeLock } from '../composables/useWakeLock'
+
+useGameWakeLock()
 
 const {
   state,
@@ -103,6 +107,7 @@ const rankedPlayers = computed(() =>
         <span class="fl-flip">FLIP</span><span class="fl-7">7</span>
       </div>
       <div class="head-actions">
+        <WakeLockToggle />
         <button class="icon-btn" @click="showRules = true" aria-label="Regler">?</button>
         <button v-if="state.started" class="icon-btn" @click="menuOpen = !menuOpen" aria-label="Meny">&#8942;</button>
       </div>

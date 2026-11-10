@@ -17,7 +17,17 @@ const emit = defineEmits<{
 
 const playerId = getPlayerId()
 const isHost = computed(() => props.session.hostId === playerId)
-const sessionUrl = computed(() => `${window.location.origin}/#/session/${props.sessionId}`)
+const sessionUrl = computed(() => `${shareOrigin()}/#/session/${props.sessionId}`)
+
+// In the local multi-device demo the host may sit on localhost, which phones can't reach
+function shareOrigin() {
+  const lanHost = import.meta.env.VITE_LAN_HOST as string
+  const { hostname, protocol, port, origin } = window.location
+  if (lanHost && (hostname === 'localhost' || hostname === '127.0.0.1')) {
+    return `${protocol}//${lanHost}${port ? `:${port}` : ''}`
+  }
+  return origin
+}
 
 function copyUrl() {
   navigator.clipboard.writeText(sessionUrl.value)
